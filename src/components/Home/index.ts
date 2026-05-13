@@ -1,0 +1,12 @@
+export { default as TalentRadar } from './TalentRadar';
+export { default as ModuleCards } from './ModuleCards';
+export { default as AchievementBadges } from './AchievementBadges';
+export { default as StarryBackground } from './StarryBackground';
+export { default as RotatingModules } from './RotatingModules';
+export { default as Torus3D } from './Torus3D';
+export { default as FloatingElements } from './FloatingElements';
+export { default as HeroText } from './HeroText';
+export { default as SpaceScene } from './SpaceScene';
+export { default as NavModules } from './NavModules';
+export { default as SocialOrbs } from './SocialOrbs';
+export { default as GlobalPortrait } from './GlobalPortrait';

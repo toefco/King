@@ -1,0 +1,38 @@
+import { useState } from 'react';
+import { TestChart, WorkoutList, AddWorkoutModal, TestList } from '../components/Fitness';
+import { BackButton } from '../components/Layout';
+
+export default function FitnessPage() {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <div className="min-h-screen relative pt-16">
+      {/* Fitness ambient glow - red energy */}
+      <div className="absolute inset-0 pointer-events-none z-0" style={{
+        background: 'radial-gradient(ellipse 60% 40% at 90% 5%, rgba(239,68,68,0.10) 0%, transparent 70%)'
+      }} />
+      <BackButton />
+      <main className="p-6 lg:p-8 relative z-10">
+        <div className="max-w-6xl mx-auto">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <TestList />
+            <div className="card">
+              <TestChart />
+            </div>
+          </div>
+
+          <div className="flex justify-end mb-4">
+            <button onClick={() => setShowModal(true)} className="btn-primary">
+              锻体
+            </button>
+          </div>
+
+          <WorkoutList />
+        </div>
+      </main>
+
+      <AddWorkoutModal isOpen={showModal} onClose={() => setShowModal(false)} />
+    </div>
+  );
+}

@@ -1,0 +1,463 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ink text-paper font-sans;
+    background: radial-gradient(ellipse at 20% 20%, #1a0a2e 0%, #0a0a1a 50%, #000000 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .btn-primary {
+    @apply bg-white/10 text-white px-4 py-2 rounded-xl font-medium transition-all border;
+    border-color: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .btn-primary:hover {
+    @apply bg-white/20;
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    @apply border text-white/70 px-4 py-2 rounded-xl font-medium transition-all;
+    border-color: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+  }
+  .btn-secondary:hover {
+    @apply text-white;
+    background-color: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.25);
+    transform: translateY(-1px);
+  }
+
+  .btn-back-home {
+    @apply relative flex items-center justify-center w-12 h-12 rounded-full;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+  }
+
+  .btn-back-home:hover {
+    transform: perspective(200px) rotateY(-8deg) rotateX(4deg) scale(1.1);
+  }
+
+  /* Premium glass card */
+  .glass-premium {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.015) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2);
+  }
+}
+
+/* ── Premium New Animations ──────────────────────────────────────────────── */
+
+@keyframes aurora-shift {
+  0%, 100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  50%       { background-position: 100% 50%; filter: hue-rotate(30deg); }
+}
+
+@keyframes shimmer-sweep {
+  0%   { transform: translateX(-150%) skewX(-20deg); opacity: 0; }
+  30%  { opacity: 0.8; }
+  100% { transform: translateX(250%) skewX(-20deg); opacity: 0; }
+}
+
+@keyframes card-entrance {
+  0%   { opacity: 0; transform: translateY(24px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes border-glow-pulse {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.9; }
+}
+
+@keyframes neon-flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96%            { opacity: 0.85; }
+  97%            { opacity: 1; }
+  98%            { opacity: 0.9; }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+.animate-aurora        { animation: aurora-shift 8s ease infinite; background-size: 200% 200%; }
+.animate-shimmer-sweep { animation: shimmer-sweep 2.5s ease infinite; }
+.animate-card-entrance { animation: card-entrance 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-float-y       { animation: float-y 4s ease-in-out infinite; }
+.animate-border-glow   { animation: border-glow-pulse 2.5s ease-in-out infinite; }
+.animate-neon          { animation: neon-flicker 4s ease-in-out infinite; }
+.animate-scale-in      { animation: scale-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-gradient-x    { animation: gradient-x 5s ease infinite; background-size: 200% 200%; }
+
+/* ── Page Theme Panel Classes ───────────────────────────────────────────────── */
+
+.panel-fitness {
+  position: relative;
+  overflow: hidden;
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.12);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(239,68,68,0.06);
+}
+
+.panel-spirit {
+  position: relative;
+  overflow: hidden;
+  background: rgba(168,85,247,0.04);
+  border: 1px solid rgba(168,85,247,0.12);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(168,85,247,0.06);
+}
+
+.panel-skills {
+  position: relative;
+  overflow: hidden;
+  background: rgba(59,130,246,0.04);
+  border: 1px solid rgba(59,130,246,0.12);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(59,130,246,0.06);
+}
+
+.panel-hobbies {
+  position: relative;
+  overflow: hidden;
+  background: rgba(236,72,153,0.04);
+  border: 1px solid rgba(236,72,153,0.12);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(236,72,153,0.06);
+}
+
+.panel-time {
+  position: relative;
+  overflow: hidden;
+  background: rgba(16,185,129,0.04);
+  border: 1px solid rgba(16,185,129,0.12);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(16,185,129,0.06);
+}
+
+/* ── Global Input/Select/Textarea Refinement ──────────────────────────────── */
+
+input, select, textarea {
+  -webkit-appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* ── Scrollbar Refinement ─────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+@keyframes glow-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-glow-spin {
+  animation: glow-spin 4s linear infinite;
+}
+
+@keyframes shine-fast {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(100%) skewX(-15deg);
+  }
+}
+
+.animate-shine-fast {
+  animation: shine-fast 1s ease-in-out infinite;
+}
+
+/* ── Anime Sprite Animations ─────────────────────────────────────────────── */
+
+@keyframes anime-float {
+  0%, 100% { transform: translateY(0px) perspective(160px) rotateY(0deg); }
+  28%       { transform: translateY(-7px) perspective(160px) rotateY(13deg); }
+  72%       { transform: translateY(-4px) perspective(160px) rotateY(-10deg); }
+}
+
+@keyframes anime-blink {
+  0%, 87%, 100% { transform: scaleY(1); }
+  90%, 94%      { transform: scaleY(0.06); }
+}
+
+@keyframes anime-aura {
+  0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 0.8; transform: translateX(-50%) scale(1.25); }
+}
+
+@keyframes anime-orb-l {
+  0%, 100% { transform: translate(0, 0);   opacity: 0.45; }
+  50%      { transform: translate(2px, -7px); opacity: 0.75; }
+}
+
+@keyframes anime-orb-r {
+  0%, 100% { transform: translate(0, 0);    opacity: 0.35; }
+  50%      { transform: translate(-2px, -5px); opacity: 0.65; }
+}
+
+@keyframes anime-sparkle {
+  0%, 100% { opacity: 0.5; transform: scale(1) rotate(0deg); }
+  50%      { opacity: 1;   transform: scale(1.3) rotate(20deg); }
+}
+
+@keyframes anime-shake {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  20%      { transform: translateY(-3px) rotate(-6deg); }
+  60%      { transform: translateY(-3px) rotate(6deg); }
+}
+
+.anime-body    { animation: anime-float  3.6s ease-in-out infinite; }
+.anime-eye-l   { animation: anime-blink  5.2s ease-in-out infinite;       transform-box: fill-box; transform-origin: center; }
+.anime-eye-r   { animation: anime-blink  5.2s ease-in-out infinite 0.09s; transform-box: fill-box; transform-origin: center; }
+.anime-aura    { animation: anime-aura   2.4s ease-in-out infinite; }
+.anime-orb-l   { animation: anime-orb-l  2.8s ease-in-out infinite; }
+.anime-orb-r   { animation: anime-orb-r  3.1s ease-in-out infinite 0.4s; }
+.anime-spark-l { animation: anime-sparkle 2.2s ease-in-out infinite; }
+.anime-spark-r { animation: anime-sparkle 2.2s ease-in-out infinite 0.7s; }
+.anime-loading { animation: anime-shake  0.55s ease-in-out infinite; }
+
+/* ── Orb Sprite Animations ───────────────────────────────────────────────── */
+
+@keyframes orb-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+@keyframes orb-glow-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.45; }
+  50%       { transform: scale(1.3);  opacity: 0.9; }
+}
+@keyframes orb-inner-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes orb-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes orb-load-pulse {
+  0%, 100% { filter: brightness(1);   transform: translateY(0px) scale(1); }
+  50%       { filter: brightness(1.6); transform: translateY(-3px) scale(1.08); }
+}
+
+.orb-ball  { animation: orb-float      3.2s ease-in-out infinite; }
+.orb-glow  { animation: orb-glow-pulse 2.0s ease-in-out infinite; }
+.orb-inner { animation: orb-inner-spin 5.0s linear infinite; }
+.orb-p1    { animation: orb-orbit 4.0s linear infinite; }
+.orb-p2    { animation: orb-orbit 5.0s linear infinite -1.67s; }
+.orb-p3    { animation: orb-orbit 3.5s linear infinite -1.17s; }
+.orb-load  { animation: orb-load-pulse 0.55s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   📱 Mobile / Tablet Responsive (≤767px)
+   Desktop styles above remain 100% untouched.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ── 全局防溢出 ─────────────────────────────────────────────────────── */
+  html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
+  }
+
+  #root {
+    overflow-x: hidden;
+  }
+
+  /* ── 所有容器不自超宽 ───────────────────────────────────────────────── */
+  img, video, canvas, svg, iframe {
+    max-width: 100%;
+  }
+
+  /* ── 触摸友好按钮：最小 44px 高 ──────────────────────────────────────── */
+  .btn-primary,
+  .btn-secondary,
+  button[class*="btn"],
+  button.flex-none {
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  /* ── 按钮文字不过小 ────────────────────────────────────────────────── */
+  .btn-primary,
+  .btn-secondary {
+    font-size: 0.875rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  /* ── 输入框/选择框高度 ─────────────────────────────────────────────── */
+  input[type="text"],
+  input[type="url"],
+  input[type="date"],
+  input[type="number"],
+  input[type="month"],
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px !important; /* 防止 iOS 自动缩放 */
+  }
+
+  /* ── 卡片/面板内边距收紧 ───────────────────────────────────────────── */
+  .card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .panel-fitness,
+  .panel-spirit,
+  .panel-skills,
+  .panel-hobbies,
+  .panel-time {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  /* ── 页面顶部间距收紧 ──────────────────────────────────────────────── */
+  .pt-16 {
+    padding-top: 3rem;
+  }
+
+  /* ── 主内容区间距 ─────────────────────────────────────────────────── */
+  main.p-6,
+  main.p-8 {
+    padding: 0.75rem;
+  }
+
+  /* ── 模态弹窗占满屏幕 ──────────────────────────────────────────────── */
+  .fixed.inset-0.flex.items-center.justify-center > [class*="max-w-md"],
+  .fixed.inset-0.flex.items-center.justify-center > [class*="max-w-lg"],
+  .fixed.inset-0.flex.items-center.justify-center > [class*="max-w-sm"] {
+    margin: 0.5rem;
+    max-width: none;
+    width: calc(100vw - 1rem);
+  }
+
+  /* ── 弹窗按钮区 ────────────────────────────────────────────────────── */
+  .fixed.inset-0.flex.items-center.justify-center button.px-4.py-2 {
+    min-height: 44px;
+  }
+
+  /* ── 图标按钮：增大可触区域 ────────────────────────────────────────── */
+  button.w-8.h-8,
+  button[class*="w-6 h-6"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* ── 文字不过大 ────────────────────────────────────────────────────── */
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.2rem; }
+  h3 { font-size: 1.05rem; }
+
+  /* ── DataManager 下拉不超出屏幕 ────────────────────────────────────── */
+  .fixed.inset-0.z-40 + .absolute.right-0 {
+    right: 0.25rem;
+    width: calc(100vw - 3rem);
+    max-width: 240px;
+    transform: none;
+  }
+
+  /* ── AiSprite 侧边面板 ─────────────────────────────────────────────── */
+  .fixed.right-0.top-0.bottom-0.z-40 {
+    width: min(100vw, 420px);
+  }
+
+  /* ── flex-wrap 默认允许换行 ────────────────────────────────────────── */
+  .flex.items-center.justify-between.flex-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .flex.items-center.justify-between.flex-wrap > * {
+    width: 100%;
+  }
+}
+
+/* ── 首页圆形模块 2.5D hover ─────────────────────────────────────────────── */
+.module-orb:hover .module-orb-surface {
+  transform: scale(1.3) !important;
+  box-shadow:
+    inset -4px -4px 10px rgba(0,0,0,0.5),
+    inset 4px 4px 10px rgba(255,255,255,0.22),
+    0 10px 30px rgba(0,0,0,0.6),
+    0 0 36px color-mix(in srgb, var(--orb-color) 50%, transparent) !important;
+}
