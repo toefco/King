@@ -88,6 +88,7 @@ export const useStore = create<AppState>()((set, get) => {
   // 初始化数据 - 使用静态数据
   const initialState = {
     ...staticData,
+    books: staticData.books as Book[],
     ownerMode: isOwnerMode(),
   };
 
@@ -170,7 +171,7 @@ export const useStore = create<AppState>()((set, get) => {
       };
     },
 
-    importData: (data) => {
+    importData: (_data) => {
       return { 
         success: false, 
         message: '线上模式：数据导入功能仅在本地开发环境可用，请编辑 staticData.ts 文件' 

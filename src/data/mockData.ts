@@ -29,13 +29,13 @@ export const mockWorkouts: Workout[] = [
 ];
 
 export const mockBooks: Book[] = [
-  { id: '1', title: '反倦怠能量站', author: '刀熊', coverUrl: '/book-cover.jpg', dataUrl: '/book-data.jpg', status: 'completed', readDate: '2024-03-15' },
-  { id: '7', title: '基督山伯爵', author: '大仲马', coverUrl: '/monte-cristo-cover.jpg', dataUrl: '/monte-cristo-data.png', status: 'completed', readDate: '2025-05-11' },
-  { id: '2', title: '活着', author: '余华', coverUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop', status: 'completed', readDate: '2024-02-20' },
-  { id: '3', title: '人类简史', author: '尤瓦尔·赫拉利', coverUrl: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=300&h=400&fit=crop', status: 'reading' },
-  { id: '4', title: '思考快与慢', author: '丹尼尔·卡尼曼', coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop', status: 'planned' },
-  { id: '5', title: '道德经', author: '老子', coverUrl: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=300&h=400&fit=crop', status: 'completed', readDate: '2024-01-10' },
-  { id: '6', title: '庄子', author: '庄周', coverUrl: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=300&h=400&fit=crop', status: 'completed', readDate: '2024-01-25' },
+  { id: '1', title: '反倦怠能量站', author: '刀熊', category: '心理', coverUrl: '/book-cover.jpg', dataUrl: '/book-data.jpg', status: 'completed', readDate: '2024-03-15' },
+  { id: '7', title: '基督山伯爵', author: '大仲马', category: '文学', coverUrl: '/monte-cristo-cover.jpg', dataUrl: '/monte-cristo-data.png', status: 'completed', readDate: '2025-05-11' },
+  { id: '2', title: '活着', author: '余华', category: '文学', coverUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop', status: 'completed', readDate: '2024-02-20' },
+  { id: '3', title: '人类简史', author: '尤瓦尔·赫拉利', category: '历史', coverUrl: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=300&h=400&fit=crop', status: 'reading' },
+  { id: '4', title: '思考快与慢', author: '丹尼尔·卡尼曼', category: '心理', coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop', status: 'planned' },
+  { id: '5', title: '道德经', author: '老子', category: '哲学', coverUrl: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=300&h=400&fit=crop', status: 'completed', readDate: '2024-01-10' },
+  { id: '6', title: '庄子', author: '庄周', category: '哲学', coverUrl: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=300&h=400&fit=crop', status: 'completed', readDate: '2024-01-25' },
 ];
 
 export const mockArticles: Article[] = [

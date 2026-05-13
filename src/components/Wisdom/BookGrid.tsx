@@ -91,8 +91,6 @@ export default function BookGrid() {
     e.preventDefault();
     const book: Book = {
       id: Date.now().toString(),
-      title: form.title || '未命名',
-      category: form.category,
       author: '',
       ...form,
       status: 'completed',

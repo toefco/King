@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Database } from 'lucide-react';
 import { useStore, isOwnerMode } from '../../store';
 
