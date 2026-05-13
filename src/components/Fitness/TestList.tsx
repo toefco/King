@@ -4,10 +4,11 @@ import { useStore } from '../../store';
 import { FitnessTest } from '../../types';
 
 const testTypes = [
-  { value: 'balance', label: '平衡力：闭眼单腿站立', unit: '秒' },
+  { value: 'balance', label: '平衡力：闭眼左腿/右腿站立', unit: '秒' },
   { value: 'flexibility', label: '柔韧性：体前屈/背后交叉', unit: '厘米' },
   { value: 'core', label: '核心力：平板支撑', unit: '秒' },
   { value: 'cardio', label: '心肺有氧：爬楼机8级', unit: '分钟' },
+  { value: 'breathing', label: '吐纳：每分钟呼吸频率', unit: '次' },
 ];
 
 export default function TestList() {
@@ -32,7 +33,7 @@ export default function TestList() {
       value: form.value,
       unit: info.unit,
     };
-    if (form.type === 'flexibility') {
+    if (form.type === 'flexibility' || form.type === 'balance') {
       test.value2 = form.value2;
     }
     addFitnessTest(test);
@@ -81,34 +82,67 @@ export default function TestList() {
               onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
             />
           </div>
-          {form.type === 'flexibility' ? (
+          {form.type === 'flexibility' || form.type === 'balance' ? (
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-paper/50 mb-1">体前屈</label>
-                <input
-                  type="number"
-                  value={form.value}
-                  onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
-                  className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
-                  style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
-                  placeholder="体前屈 cm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-paper/50 mb-1">背后交叉</label>
-                <input
-                  type="number"
-                  value={form.value2}
-                  onChange={(e) => setForm({ ...form, value2: Number(e.target.value) })}
-                  className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
-                  style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
-                  placeholder="背后交叉 cm"
-                />
-              </div>
+              {form.type === 'balance' ? (
+                <>
+                  <div>
+                    <label className="block text-xs text-paper/50 mb-1">左腿</label>
+                    <input
+                      type="number"
+                      value={form.value}
+                      onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
+                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
+                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
+                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
+                      placeholder="左腿 秒"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-paper/50 mb-1">右腿</label>
+                    <input
+                      type="number"
+                      value={form.value2}
+                      onChange={(e) => setForm({ ...form, value2: Number(e.target.value) })}
+                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
+                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
+                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
+                      placeholder="右腿 秒"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs text-paper/50 mb-1">体前屈</label>
+                    <input
+                      type="number"
+                      value={form.value}
+                      onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
+                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
+                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
+                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
+                      placeholder="体前屈 cm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-paper/50 mb-1">背后交叉</label>
+                    <input
+                      type="number"
+                      value={form.value2}
+                      onChange={(e) => setForm({ ...form, value2: Number(e.target.value) })}
+                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
+                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
+                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
+                      placeholder="背后交叉 cm"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <input
@@ -130,7 +164,7 @@ export default function TestList() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         {testTypes.map((type) => {
           const latest = fitnessTests.filter((t) => t.type === type.value).slice(-1)[0];
-          const isFlex = type.value === 'flexibility';
+          const isBalanceOrFlex = type.value === 'flexibility' || type.value === 'balance';
           return (
             <div key={type.value} className="p-4 rounded-xl" style={{
               background: 'rgba(239,68,68,0.05)',
@@ -140,7 +174,7 @@ export default function TestList() {
               <div className="text-sm text-paper/60 mb-1">{type.label}</div>
               <div className="text-2xl font-serif" style={{ color: '#ef4444' }}>
                 {latest
-                  ? isFlex && latest.value2 != null
+                  ? isBalanceOrFlex && latest.value2 != null
                     ? `${latest.value} / ${latest.value2}`
                     : latest.value
                   : '--'}
@@ -165,7 +199,7 @@ export default function TestList() {
               .sort((a, b) => b.date.localeCompare(a.date))
               .map((test) => {
                 const info = testTypes.find((t) => t.value === test.type);
-                const isFlex = test.type === 'flexibility';
+                const isBalanceOrFlex = test.type === 'flexibility' || test.type === 'balance';
                 return (
                   <div key={test.id} className="flex items-center justify-between px-3 py-2 rounded-lg text-sm group" style={{
                     background: 'rgba(239,68,68,0.03)', border: '1px solid rgba(239,68,68,0.08)'
@@ -173,7 +207,7 @@ export default function TestList() {
                     <span className="text-paper/60">{info?.label || test.type}</span>
                     <div className="flex items-center gap-3">
                       <span className="font-serif" style={{ color: '#ef4444' }}>
-                        {isFlex && test.value2 != null
+                        {isBalanceOrFlex && test.value2 != null
                           ? `${test.value} / ${test.value2}${test.unit}`
                           : `${test.value}${test.unit}`}
                       </span>

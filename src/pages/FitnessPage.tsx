@@ -1,9 +1,26 @@
 import { useState } from 'react';
 import { TestChart, WorkoutList, AddWorkoutModal, TestList } from '../components/Fitness';
 import { BackButton } from '../components/Layout';
+import { Workout } from '../types';
 
 export default function FitnessPage() {
   const [showModal, setShowModal] = useState(false);
+  const [editWorkout, setEditWorkout] = useState<Workout | null>(null);
+
+  const handleOpenAdd = () => {
+    setEditWorkout(null);
+    setShowModal(true);
+  };
+
+  const handleEdit = (workout: Workout) => {
+    setEditWorkout(workout);
+    setShowModal(true);
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setEditWorkout(null);
+  };
 
   return (
     <div className="min-h-screen relative pt-16">
@@ -23,16 +40,16 @@ export default function FitnessPage() {
           </div>
 
           <div className="flex justify-end mb-4">
-            <button onClick={() => setShowModal(true)} className="btn-primary">
+            <button onClick={handleOpenAdd} className="btn-primary">
               锻体
             </button>
           </div>
 
-          <WorkoutList />
+          <WorkoutList onEdit={handleEdit} />
         </div>
       </main>
 
-      <AddWorkoutModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <AddWorkoutModal isOpen={showModal} onClose={handleClose} editWorkout={editWorkout} />
     </div>
   );
 }

@@ -146,12 +146,19 @@ export default function RotatingModules() {
     if (Math.abs(velocityRef.current) > 0.05) {
       rafRef.current = requestAnimationFrame(applyMomentum);
     } else {
-      // Snap transition
+      // Snap to nearest 60 degree multiple for clean alignment
+      const snapDeg = 60;
+      const current = rotationRef.current;
+      const snapped = Math.round(current / snapDeg) * snapDeg;
+      rotationRef.current = snapped;
+      
       if (wheelRef.current) {
         wheelRef.current.style.transition = 'transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)';
+        wheelRef.current.style.transform = `rotate(${snapped}deg)`;
       }
+      syncText();
     }
-  }, [applyMomentum]);
+  }, [applyMomentum, syncText]);
 
   useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current);

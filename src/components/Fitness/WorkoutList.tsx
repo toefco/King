@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Edit2 } from 'lucide-react';
 import { useStore } from '../../store';
+import { Workout } from '../../types';
 
 const actionColors = [
   '#4a90d9', '#c73e3a', '#d4af37', '#2d5a27', '#9b59b6',
@@ -10,7 +11,11 @@ const actionColors = [
 type SortField = 'date' | 'volume';
 type SortOrder = 'asc' | 'desc';
 
-export default function WorkoutList() {
+interface Props {
+  onEdit?: (workout: Workout) => void;
+}
+
+export default function WorkoutList({ onEdit }: Props) {
   const workouts = useStore((state) => state.workouts);
   const deleteWorkout = useStore((state) => state.deleteWorkout);
 
@@ -117,12 +122,22 @@ export default function WorkoutList() {
                 {workout.date} · {workout.sets}组 × {workout.reps}次 · {workout.weight}kg
               </div>
             </div>
-            <button
-              onClick={() => deleteWorkout(workout.id)}
-              className="p-2 text-paper/40 hover:text-cinnabar transition-colors"
-            >
-              <Trash2 size={16} />
-            </button>
+            <div className="flex items-center gap-1">
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(workout)}
+                  className="p-2 text-paper/40 hover:text-gold transition-colors"
+                >
+                  <Edit2 size={16} />
+                </button>
+              )}
+              <button
+                onClick={() => deleteWorkout(workout.id)}
+                className="p-2 text-paper/40 hover:text-cinnabar transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
         ))}
       </div>

@@ -97,55 +97,157 @@ export const useStore = create<AppState>()((set, get) => {
     console.log('线上模式：数据编辑功能仅在本地开发环境可用');
   };
 
+  // 检测是否是主人模式
+  const isOwner = () => get().ownerMode;
+
+  // 主人模式下的真实实现，线上模式为noop
+  const createAction = <T extends (...args: any[]) => any>(ownerAction: T): T => {
+    return ((...args: any[]) => {
+      if (isOwner()) {
+        return (ownerAction as any)(...args);
+      } else {
+        noop();
+      }
+    }) as T;
+  };
+
   return {
     ...initialState,
 
     // 权限控制
     setOwnerModeInStore: (on: boolean) => set({ ownerMode: on }),
 
-    // 所有修改操作都是无操作，保持只读
-    addWorkout: noop,
-    updateWorkout: noop,
-    deleteWorkout: noop,
-    addFitnessTest: noop,
-    updateFitnessTest: noop,
-    deleteFitnessTest: noop,
-    addBook: noop,
-    updateBook: noop,
-    deleteBook: noop,
-    updateBookThoughts: noop,
-    addYearSummary: noop,
-    updateYearSummary: noop,
-    deleteYearSummary: noop,
-    addArticle: noop,
-    updateArticle: noop,
-    deleteArticle: noop,
-    addTrait: noop,
-    updateTrait: noop,
-    deleteTrait: noop,
-    addSkill: noop,
-    updateSkill: noop,
-    deleteSkill: noop,
-    addHobby: noop,
-    updateHobby: noop,
-    deleteHobby: noop,
-    addSchedule: noop,
-    updateSchedule: noop,
-    deleteSchedule: noop,
-    addHappiness: noop,
-    updateHappiness: noop,
-    deleteHappiness: noop,
-    setScheduleRecords: noop,
-    addScheduleRecord: noop,
-    updateScheduleRecord: noop,
-    deleteScheduleRecord: noop,
-    setHappinessRecords: noop,
-    addHappinessRecord: noop,
-    updateHappinessRecord: noop,
-    deleteHappinessRecord: noop,
-    updateTalentScore: noop,
-    setReadingSlots: noop,
-    setBrokenSlots: noop,
+    // 健身模块
+    addWorkout: createAction((workout: Workout) => 
+      set((state) => ({ workouts: [...state.workouts, workout] }))
+    ),
+    updateWorkout: createAction((id: string, patch: Partial<Workout>) => 
+      set((state) => ({ workouts: state.workouts.map(w => w.id === id ? { ...w, ...patch } : w) }))
+    ),
+    deleteWorkout: createAction((id: string) => 
+      set((state) => ({ workouts: state.workouts.filter(w => w.id !== id) }))
+    ),
+    addFitnessTest: createAction((test: FitnessTest) => 
+      set((state) => ({ fitnessTests: [...state.fitnessTests, test] }))
+    ),
+    updateFitnessTest: createAction((id: string, patch: Partial<FitnessTest>) => 
+      set((state) => ({ fitnessTests: state.fitnessTests.map(t => t.id === id ? { ...t, ...patch } : t) }))
+    ),
+    deleteFitnessTest: createAction((id: string) => 
+      set((state) => ({ fitnessTests: state.fitnessTests.filter(t => t.id !== id) }))
+    ),
+
+    // 智慧模块
+    addBook: createAction((book: Book) => 
+      set((state) => ({ books: [...state.books, book] }))
+    ),
+    updateBook: createAction((id: string, patch: Partial<Book>) => 
+      set((state) => ({ books: state.books.map(b => b.id === id ? { ...b, ...patch } : b) }))
+    ),
+    deleteBook: createAction((id: string) => 
+      set((state) => ({ books: state.books.filter(b => b.id !== id) }))
+    ),
+    updateBookThoughts: createAction((id: string, thoughts: string) => 
+      set((state) => ({ books: state.books.map(b => b.id === id ? { ...b, thoughts } : b) }))
+    ),
+
+    // 其他模块（全部实现基本功能）
+    addYearSummary: createAction((summary: YearSummary) => 
+      set((state) => ({ yearSummaries: [...state.yearSummaries, summary] }))
+    ),
+    updateYearSummary: createAction((id: string, patch: Partial<YearSummary>) => 
+      set((state) => ({ yearSummaries: state.yearSummaries.map(y => y.id === id ? { ...y, ...patch } : y) }))
+    ),
+    deleteYearSummary: createAction((id: string) => 
+      set((state) => ({ yearSummaries: state.yearSummaries.filter(y => y.id !== id) }))
+    ),
+    addArticle: createAction((article: Article) => 
+      set((state) => ({ articles: [...state.articles, article] }))
+    ),
+    updateArticle: createAction((id: string, patch: Partial<Article>) => 
+      set((state) => ({ articles: state.articles.map(a => a.id === id ? { ...a, ...patch } : a) }))
+    ),
+    deleteArticle: createAction((id: string) => 
+      set((state) => ({ articles: state.articles.filter(a => a.id !== id) }))
+    ),
+    addTrait: createAction((trait: Trait) => 
+      set((state) => ({ traits: [...state.traits, trait] }))
+    ),
+    updateTrait: createAction((id: string, patch: Partial<Trait>) => 
+      set((state) => ({ traits: state.traits.map(t => t.id === id ? { ...t, ...patch } : t) }))
+    ),
+    deleteTrait: createAction((id: string) => 
+      set((state) => ({ traits: state.traits.filter(t => t.id !== id) }))
+    ),
+    addSkill: createAction((skill: Skill) => 
+      set((state) => ({ skills: [...state.skills, skill] }))
+    ),
+    updateSkill: createAction((id: string, patch: Partial<Skill>) => 
+      set((state) => ({ skills: state.skills.map(s => s.id === id ? { ...s, ...patch } : s) }))
+    ),
+    deleteSkill: createAction((id: string) => 
+      set((state) => ({ skills: state.skills.filter(s => s.id !== id) }))
+    ),
+    addHobby: createAction((hobby: Hobby) => 
+      set((state) => ({ hobbies: [...state.hobbies, hobby] }))
+    ),
+    updateHobby: createAction((id: string, patch: Partial<Hobby>) => 
+      set((state) => ({ hobbies: state.hobbies.map(h => h.id === id ? { ...h, ...patch } : h) }))
+    ),
+    deleteHobby: createAction((id: string) => 
+      set((state) => ({ hobbies: state.hobbies.filter(h => h.id !== id) }))
+    ),
+    addSchedule: createAction((schedule: Schedule) => 
+      set((state) => ({ schedules: [...state.schedules, schedule] }))
+    ),
+    updateSchedule: createAction((id: string, patch: Partial<Schedule>) => 
+      set((state) => ({ schedules: state.schedules.map(s => s.id === id ? { ...s, ...patch } : s) }))
+    ),
+    deleteSchedule: createAction((id: string) => 
+      set((state) => ({ schedules: state.schedules.filter(s => s.id !== id) }))
+    ),
+    addHappiness: createAction((happiness: Happiness) => 
+      set((state) => ({ happiness: [...state.happiness, happiness] }))
+    ),
+    updateHappiness: createAction((id: string, patch: Partial<Happiness>) => 
+      set((state) => ({ happiness: state.happiness.map(h => h.id === id ? { ...h, ...patch } : h) }))
+    ),
+    deleteHappiness: createAction((id: string) => 
+      set((state) => ({ happiness: state.happiness.filter(h => h.id !== id) }))
+    ),
+    setScheduleRecords: createAction((records: ScheduleRecord[]) => 
+      set({ scheduleRecords: records })
+    ),
+    addScheduleRecord: createAction((record: ScheduleRecord) => 
+      set((state) => ({ scheduleRecords: [...state.scheduleRecords, record] }))
+    ),
+    updateScheduleRecord: createAction((id: string, patch: Partial<ScheduleRecord>) => 
+      set((state) => ({ scheduleRecords: state.scheduleRecords.map(r => r.id === id ? { ...r, ...patch } : r) }))
+    ),
+    deleteScheduleRecord: createAction((id: string) => 
+      set((state) => ({ scheduleRecords: state.scheduleRecords.filter(r => r.id !== id) }))
+    ),
+    setHappinessRecords: createAction((records: HappinessRecord[]) => 
+      set({ happinessRecords: records })
+    ),
+    addHappinessRecord: createAction((record: HappinessRecord) => 
+      set((state) => ({ happinessRecords: [...state.happinessRecords, record] }))
+    ),
+    updateHappinessRecord: createAction((id: string, patch: Partial<HappinessRecord>) => 
+      set((state) => ({ happinessRecords: state.happinessRecords.map(r => r.id === id ? { ...r, ...patch } : r) }))
+    ),
+    deleteHappinessRecord: createAction((id: string) => 
+      set((state) => ({ happinessRecords: state.happinessRecords.filter(r => r.id !== id) }))
+    ),
+    updateTalentScore: createAction((id: string, score: number) => 
+      set((state) => ({ talents: state.talents.map(t => t.id === id ? { ...t, score } : t) }))
+    ),
+    setReadingSlots: createAction((slots: (string | null)[]) => 
+      set({ readingSlots: slots })
+    ),
+    setBrokenSlots: createAction((slots: number[]) => 
+      set({ brokenSlots: slots })
+    ),
 
     // 数据管理功能
     exportData: () => {
@@ -171,15 +273,45 @@ export const useStore = create<AppState>()((set, get) => {
       };
     },
 
-    importData: (_data) => {
-      return { 
-        success: false, 
-        message: '线上模式：数据导入功能仅在本地开发环境可用，请编辑 staticData.ts 文件' 
-      };
-    },
+    importData: createAction((data: any) => {
+      if (data.version && data.books) {
+        set({
+          talents: data.talents || [],
+          fitnessTests: data.fitnessTests || [],
+          workouts: data.workouts || [],
+          books: data.books || [],
+          yearSummaries: data.yearSummaries || [],
+          articles: data.articles || [],
+          skills: data.skills || [],
+          hobbies: data.hobbies || [],
+          schedules: data.schedules || [],
+          happiness: data.happiness || [],
+          scheduleRecords: data.scheduleRecords || [],
+          happinessRecords: data.happinessRecords || [],
+          traits: data.traits || [],
+          readingSlots: data.readingSlots || [],
+          brokenSlots: data.brokenSlots || [],
+        });
+        return { success: true, message: '数据导入成功！' };
+      }
+      return { success: false, message: '无效的数据格式' };
+    }),
 
-    clearAllData: () => {
-      console.log('线上模式：数据清空功能仅在本地开发环境可用');
-    }
+    clearAllData: createAction(() => {
+      set({
+        fitnessTests: [],
+        workouts: [],
+        books: [],
+        yearSummaries: [],
+        articles: [],
+        skills: [],
+        hobbies: [],
+        schedules: [],
+        happiness: [],
+        scheduleRecords: [],
+        happinessRecords: [],
+        traits: [],
+      });
+    })
   };
 });

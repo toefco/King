@@ -352,8 +352,8 @@ export function AiSprite() {
         @media (max-width: 768px) {
           .chat-panel {
             width: calc(100% - 32px);
-            height: 55vh;
-            max-height: 500px;
+            height: 60vh;
+            max-height: 600px;
             left: 16px;
             right: 16px;
             bottom: 16px;

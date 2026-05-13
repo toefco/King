@@ -15,7 +15,7 @@ export interface Talent {
 export interface FitnessTest {
   id: string;
   date: string;
-  type: 'balance' | 'flexibility' | 'core' | 'cardio';
+  type: 'balance' | 'flexibility' | 'core' | 'cardio' | 'breathing';
   value: number;
   value2?: number;
   unit: string;
@@ -45,6 +45,18 @@ export interface Book {
   readingDays?: number;
   maxDailyHours?: number;
   maxDailyMinutes?: number;
+}
+
+export interface ReadingSlot {
+  id: string;
+  imageUrl: string;
+  totalYears?: number;
+  totalHours?: number;
+  totalMinutes?: number;
+  avgHours?: number;
+  avgMinutes?: number;
+  totalBooks?: number;
+  readingDays?: number;
 }
 
 export interface YearSummary {

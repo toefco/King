@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useStore } from '../../store';
 import { Workout } from '../../types';
@@ -6,10 +6,12 @@ import { Workout } from '../../types';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  editWorkout?: Workout | null;
 }
 
-export default function AddWorkoutModal({ isOpen, onClose }: Props) {
+export default function AddWorkoutModal({ isOpen, onClose, editWorkout }: Props) {
   const addWorkout = useStore((state) => state.addWorkout);
+  const updateWorkout = useStore((state) => state.updateWorkout);
   const [form, setForm] = useState({
     exercise: '',
     weight: 0,
@@ -18,13 +20,38 @@ export default function AddWorkoutModal({ isOpen, onClose }: Props) {
     date: new Date().toISOString().split('T')[0],
   });
 
+  // 当编辑的 workout 变化时，更新表单
+  React.useEffect(() => {
+    if (editWorkout) {
+      setForm({
+        exercise: editWorkout.exercise,
+        weight: editWorkout.weight,
+        sets: editWorkout.sets,
+        reps: editWorkout.reps,
+        date: editWorkout.date,
+      });
+    } else {
+      setForm({
+        exercise: '',
+        weight: 0,
+        sets: 4,
+        reps: 8,
+        date: new Date().toISOString().split('T')[0],
+      });
+    }
+  }, [editWorkout]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const workout: Workout = {
-      id: Date.now().toString(),
-      ...form,
-    };
-    addWorkout(workout);
+    if (editWorkout) {
+      updateWorkout(editWorkout.id, form);
+    } else {
+      const workout: Workout = {
+        id: Date.now().toString(),
+        ...form,
+      };
+      addWorkout(workout);
+    }
     setForm({ exercise: '', weight: 0, sets: 4, reps: 8, date: new Date().toISOString().split('T')[0] });
     onClose();
   };
@@ -251,7 +278,7 @@ export default function AddWorkoutModal({ isOpen, onClose }: Props) {
               e.currentTarget.style.boxShadow = '0 4px 24px rgba(139, 144, 184, 0.2)';
               e.currentTarget.style.transform = 'translateY(0)';
             }}>
-              炼
+              {editWorkout ? '加点' : '炼'}
             </button>
           </div>
         </form>

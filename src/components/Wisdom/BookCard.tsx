@@ -1,14 +1,15 @@
 import { useState, useRef } from 'react';
-import { Trash2, BookOpen } from 'lucide-react';
+import { Trash2, BookOpen, Edit2 } from 'lucide-react';
 import { Book } from '../../types';
 import { useStore } from '../../store';
 
 interface Props {
   book: Book;
   onImageClick: (book: Book, type: 'cover' | 'data') => void;
+  onEdit?: (book: Book) => void;
 }
 
-export default function BookCard({ book, onImageClick }: Props) {
+export default function BookCard({ book, onImageClick, onEdit }: Props) {
   const deleteBook = useStore((state) => state.deleteBook);
   const updateBookThoughts = useStore((state) => state.updateBookThoughts);
   const [thoughts, setThoughts] = useState(book.thoughts || '');
@@ -76,6 +77,28 @@ export default function BookCard({ book, onImageClick }: Props) {
           }}
         />
 
+        {/* Edit button */}
+        {onEdit && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(book); }}
+            className="absolute top-2 right-12 z-20 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
+            style={{
+              background: 'rgba(0,0,0,0.75)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(8px)',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(212,175,55,0.2)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(212,175,55,0.4)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0.75)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.1)';
+            }}
+          >
+            <Edit2 size={12} style={{ color: 'rgba(255,255,255,0.5)' }} />
+          </button>
+        )}
         {/* Delete button */}
         <button
           onClick={(e) => { e.stopPropagation(); deleteBook(book.id); }}
