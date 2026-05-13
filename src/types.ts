@@ -47,17 +47,17 @@ export interface Book {
   maxDailyMinutes?: number;
 }
 
-export interface ReadingSlot {
+export interface ReadingSlotObject {
   id: string;
   imageUrl: string;
   totalYears?: number;
   totalHours?: number;
   totalMinutes?: number;
-  avgHours?: number;
-  avgMinutes?: number;
   totalBooks?: number;
   readingDays?: number;
 }
+
+export type ReadingSlot = ReadingSlotObject | string;
 
 export interface YearSummary {
   id: string;

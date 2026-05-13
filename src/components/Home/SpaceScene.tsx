@@ -1,6 +1,6 @@
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars } from '@react-three/drei';
+import { OrbitControls, Stars, MapControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 /* ─── 星云核心 Shader ──────────────────────────────────────────────────────── */
@@ -290,8 +290,11 @@ function SceneContent() {
         enablePan={false}
         autoRotate
         autoRotateSpeed={0.12}
-        minPolarAngle={Math.PI / 3}
-        maxPolarAngle={Math.PI / 1.6}
+        minPolarAngle={0}
+        maxPolarAngle={Math.PI}
+        minAzimuthAngle={-Infinity}
+        maxAzimuthAngle={Infinity}
+        makeDefault
       />
     </>
   );
@@ -299,7 +302,7 @@ function SceneContent() {
 
 export default function SpaceScene() {
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 9], fov: 58 }}
         gl={{ antialias: true, alpha: false }}

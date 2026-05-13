@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { Talent, FitnessTest, Workout, Book, YearSummary, Article, Skill, Hobby, Schedule, ScheduleRecord, HappinessRecord, Happiness, Trait } from './types';
+import { Talent, FitnessTest, Workout, Book, YearSummary, Article, Skill, Hobby, Schedule, ScheduleRecord, HappinessRecord, Happiness, Trait, ReadingSlot, ReadingSlotObject } from './types';
 import { staticData } from './data/staticData';
 
 // 主人模式检测
@@ -29,7 +29,7 @@ interface AppState {
   scheduleRecords: ScheduleRecord[];
   happinessRecords: HappinessRecord[];
   traits: Trait[];
-  readingSlots: (string | null)[];
+  readingSlots: (ReadingSlot | null)[];
   brokenSlots: number[];
   
   // 只读操作（所有编辑操作在本地完成，线上只展示）
@@ -74,7 +74,9 @@ interface AppState {
   updateHappinessRecord: (id: string, patch: Partial<HappinessRecord>) => void;
   deleteHappinessRecord: (id: string) => void;
   updateTalentScore: (id: string, score: number) => void;
-  setReadingSlots: (slots: (string | null)[]) => void;
+  setReadingSlots: (slots: (ReadingSlot | null)[]) => void;
+  updateReadingSlot: (index: number, slot: ReadingSlotObject) => void;
+  deleteReadingSlot: (index: number) => void;
   setBrokenSlots: (slots: number[]) => void;
   
   // 数据管理
@@ -242,8 +244,22 @@ export const useStore = create<AppState>()((set, get) => {
     updateTalentScore: createAction((id: string, score: number) => 
       set((state) => ({ talents: state.talents.map(t => t.id === id ? { ...t, score } : t) }))
     ),
-    setReadingSlots: createAction((slots: (string | null)[]) => 
+    setReadingSlots: createAction((slots: (ReadingSlot | null)[]) => 
       set({ readingSlots: slots })
+    ),
+    updateReadingSlot: createAction((index: number, slot: ReadingSlotObject) => 
+      set((state) => {
+        const newSlots = [...state.readingSlots];
+        newSlots[index] = slot;
+        return { readingSlots: newSlots };
+      })
+    ),
+    deleteReadingSlot: createAction((index: number) => 
+      set((state) => {
+        const newSlots = [...state.readingSlots];
+        newSlots[index] = null;
+        return { readingSlots: newSlots };
+      })
     ),
     setBrokenSlots: createAction((slots: number[]) => 
       set({ brokenSlots: slots })

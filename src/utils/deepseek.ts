@@ -113,7 +113,13 @@ export function collectSiteMedia() {
   
   // 慧府
   if (state.readingSlots && Array.isArray(state.readingSlots)) {
-    state.readingSlots.forEach((url, index) => {
+    state.readingSlots.forEach((slot, index) => {
+      let url;
+      if (slot && typeof slot === 'object') {
+        url = slot.imageUrl;
+      } else if (slot && typeof slot === 'string') {
+        url = slot;
+      }
       if (url && isLocalImage(url)) {
         media.push({ type: '慧府图片', title: '慧府槽位' + (index + 1), url: url, mediaType: 'image' });
       }

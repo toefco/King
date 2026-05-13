@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Plus, X, Image, Trash2, Upload, Edit2 } from 'lucide-react';
 import { useStore } from '../../store';
-import { Book, YearSummary } from '../../types';
+import { Book, YearSummary, ReadingSlotObject } from '../../types';
 import BookCard from './BookCard';
 
 function fileToBase64(file: File): Promise<string> {
@@ -25,12 +25,12 @@ export default function BookGrid() {
   const updateBook = useStore((state) => state.updateBook);
   const readingSlots = useStore((state) => state.readingSlots);
   const brokenSlots = useStore((state) => state.brokenSlots);
-  const setReadingSlots = useStore((state) => state.setReadingSlots);
   const setBrokenSlots = useStore((state) => state.setBrokenSlots);
+  const updateReadingSlot = useStore((state) => state.updateReadingSlot);
+  const deleteReadingSlot = useStore((state) => state.deleteReadingSlot);
 
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isAddingSlot, setIsAddingSlot] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [selectedType, setSelectedType] = useState<'cover' | 'data'>('cover');
   const [thoughts, setThoughts] = useState('');
@@ -48,9 +48,16 @@ export default function BookGrid() {
     maxDailyMinutes: 0,
   });
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
-  const [slotForm, setSlotForm] = useState({
-    slotIndex: 0,
-    url: '',
+  // 增寰弹窗状态
+  const [isZengHuanOpen, setIsZengHuanOpen] = useState(false);
+  const [zengHuanSlotIndex, setZengHuanSlotIndex] = useState<number>(0);
+  const [zengHuanForm, setZengHuanForm] = useState({
+    imageUrl: '',
+    totalYears: 0,
+    totalHours: 0,
+    totalMinutes: 0,
+    totalBooks: 0,
+    readingDays: 0,
   });
   const [selectedSummary, setSelectedSummary] = useState<YearSummary | null>(null);
   const [selectedSlotSummary, setSelectedSlotSummary] = useState<{year: string; imageUrl: string} | null>(null);
@@ -66,8 +73,6 @@ export default function BookGrid() {
   const hasThoughtsBooks = useMemo(() => {
     return completedBooks.filter(b => b.thoughts && b.thoughts.trim().length > 0);
   }, [completedBooks]);
-
-  // 统计计算（已移除，不再使用）
 
   const monthOptions = useMemo(() => {
     const set = new Set<string>();
@@ -136,21 +141,78 @@ export default function BookGrid() {
     setEditingBookId(null);
   };
 
-  const handleSlotSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!slotForm.url.trim()) return;
-    const newSlots = [...readingSlots];
-    newSlots[slotForm.slotIndex] = slotForm.url.trim();
-    setReadingSlots(newSlots);
-    const newBroken = brokenSlots.filter(s => s !== slotForm.slotIndex);
-    setBrokenSlots(newBroken);
-    setSlotForm({ slotIndex: 0, url: '' });
-    setIsAddingSlot(false);
+  // 打开增寰弹窗
+  const openZengHuanModal = (index: number) => {
+    setZengHuanSlotIndex(index);
+    const slot = readingSlots[index];
+    if (slot && typeof slot === 'object' && 'id' in slot) {
+      setZengHuanForm({
+        imageUrl: slot.imageUrl || '',
+        totalYears: slot.totalYears || 0,
+        totalHours: slot.totalHours || 0,
+        totalMinutes: slot.totalMinutes || 0,
+        totalBooks: slot.totalBooks || 0,
+        readingDays: slot.readingDays || 0,
+      });
+    } else if (slot && typeof slot === 'string') {
+      // 兼容旧的数据格式
+      setZengHuanForm({
+        imageUrl: slot,
+        totalYears: 0,
+        totalHours: 0,
+        totalMinutes: 0,
+        totalBooks: 0,
+        readingDays: 0,
+      });
+    } else {
+      setZengHuanForm({
+        imageUrl: '',
+        totalYears: 0,
+        totalHours: 0,
+        totalMinutes: 0,
+        totalBooks: 0,
+        readingDays: 0,
+      });
+    }
+    setIsZengHuanOpen(true);
   };
 
-  const openSlotModal = (index?: number) => {
-    setSlotForm({ slotIndex: index || 0, url: readingSlots[index || 0] || '' });
-    setIsAddingSlot(true);
+  // 提交增寰数据
+  const handleZengHuanSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!zengHuanForm.imageUrl.trim()) return;
+    
+    const newSlot: ReadingSlotObject = {
+      id: `slot-${zengHuanSlotIndex}`,
+      imageUrl: zengHuanForm.imageUrl,
+      totalYears: zengHuanForm.totalYears || undefined,
+      totalHours: zengHuanForm.totalHours || undefined,
+      totalMinutes: zengHuanForm.totalMinutes || undefined,
+      totalBooks: zengHuanForm.totalBooks || undefined,
+      readingDays: zengHuanForm.readingDays || undefined,
+    };
+    
+    updateReadingSlot(zengHuanSlotIndex, newSlot);
+    
+    // 清除错误状态
+    const newBroken = brokenSlots.filter(s => s !== zengHuanSlotIndex);
+    setBrokenSlots(newBroken);
+    
+    // 重置表单
+    setZengHuanForm({
+      imageUrl: '',
+      totalYears: 0,
+      totalHours: 0,
+      totalMinutes: 0,
+      totalBooks: 0,
+      readingDays: 0,
+    });
+    setIsZengHuanOpen(false);
+  };
+
+  // 删除槽位
+  const handleDeleteSlot = (index: number) => {
+    deleteReadingSlot(index);
   };
 
   const openModal = (book: Book, type: 'cover' | 'data' = 'cover') => {
@@ -164,14 +226,6 @@ export default function BookGrid() {
       updateBookThoughts(selectedBook.id, thoughts);
       setSelectedBook({ ...selectedBook, thoughts });
     }
-  };
-
-  const handleDeleteSlot = (index: number) => {
-    const newSlots = [...readingSlots];
-    newSlots[index] = null;
-    setReadingSlots(newSlots);
-    const newBroken = brokenSlots.filter(s => s !== index);
-    setBrokenSlots(newBroken);
   };
 
   const handleImageError = (index: number) => {
@@ -226,96 +280,89 @@ export default function BookGrid() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-serif text-gold">🏯 慧府</h3>
         </div>
+        
         {/* 10格图片网格 */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {readingSlots.map((url, i) => (
-            <div key={i} className="aspect-[1/1] rounded-xl overflow-hidden border border-gold/10 hover:border-gold/30 hover:-translate-y-1 hover:shadow-lg hover:shadow-gold/5 transition-all duration-300">
-              {url ? (
-                brokenSlots.includes(i) ? (
-                  <button
-                    className="flex flex-col items-center justify-center w-full h-full gap-1 text-cinnabar/40 hover:text-cinnabar hover:bg-cinnabar/5 transition-colors"
-                    onClick={() => openSlotModal(i)}
-                  >
-                    <Image size={16} />
-                    <span className="text-[10px]">重试</span>
-                  </button>
-                ) : (
-                <div className="relative group/slot w-full h-full cursor-pointer" onClick={() => setSelectedSlotSummary({ year: `汇总 ${i + 1}`, imageUrl: url })}>
-                  <div className="absolute top-1.5 left-1.5 flex gap-1 z-10 opacity-0 group-hover/slot:opacity-100 transition-opacity">
+          {readingSlots.map((slot, i) => {
+            const url = slot && typeof slot === 'object' ? slot.imageUrl : (slot || null);
+            return (
+              <div key={i} className="aspect-[1/1] rounded-xl overflow-hidden border border-gold/10 hover:border-gold/30 hover:-translate-y-1 hover:shadow-lg hover:shadow-gold/5 transition-all duration-300">
+                {url ? (
+                  brokenSlots.includes(i) ? (
+                    <button
+                      className="flex flex-col items-center justify-center w-full h-full gap-1 text-cinnabar/40 hover:text-cinnabar hover:bg-cinnabar/5 transition-colors"
+                      onClick={() => openZengHuanModal(i)}
+                    >
+                      <Image size={16} />
+                      <span className="text-[10px]">重试</span>
+                    </button>
+                  ) : (
+                  <div className="relative group/slot w-full h-full cursor-pointer" onClick={() => setSelectedSlotSummary({ year: `汇总 ${i + 1}`, imageUrl: url })}>
+                    <div className="absolute top-1.5 left-1.5 flex gap-1 z-10 opacity-0 group-hover/slot:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openZengHuanModal(i);
+                        }}
+                        className="p-1 rounded bg-ink/80 text-paper/40 hover:text-gold"
+                      >
+                        <Edit2 size={12} />
+                      </button>
+                    </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        openSlotModal(i);
+                        handleDeleteSlot(i);
                       }}
-                      className="p-1 rounded bg-ink/80 text-paper/40 hover:text-gold"
+                      className="absolute top-1.5 right-1.5 z-10 p-1 rounded bg-ink/80 text-paper/40 hover:text-cinnabar opacity-0 group-hover/slot:opacity-100 transition-opacity"
                     >
-                      <Edit2 size={12} />
+                      <Trash2 size={12} />
                     </button>
+                    <img
+                      src={url}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover object-top"
+                      onError={() => handleImageError(i)}
+                    />
                   </div>
+                  )
+                ) : (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteSlot(i);
-                    }}
-                    className="absolute top-1.5 right-1.5 z-10 p-1 rounded bg-ink/80 text-paper/40 hover:text-cinnabar opacity-0 group-hover/slot:opacity-100 transition-opacity"
+                    className="flex flex-col items-center justify-center w-full h-full gap-1 text-paper/30 hover:text-gold hover:bg-gold/5 transition-colors"
+                    onClick={() => openZengHuanModal(i)}
                   >
-                    <Trash2 size={12} />
+                    <Plus size={16} />
+                    <span className="text-[10px]">增寰</span>
                   </button>
-                  <img
-                    src={url}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover object-top"
-                    onError={() => handleImageError(i)}
-                  />
-                </div>
-                )
-              ) : (
-                <button
-                  className="flex flex-col items-center justify-center w-full h-full gap-1 text-paper/30 hover:text-gold hover:bg-gold/5 transition-colors"
-                  onClick={() => openSlotModal(i)}
-                >
-                  <Plus size={16} />
-                  <span className="text-[10px]">添加</span>
-                </button>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* 10格图片添加弹窗 - 深蓝加点风格 */}
-      {isAddingSlot && (
+      {/* 增寰弹窗 */}
+      {isZengHuanOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-ink border border-gold/30 rounded-xl w-full max-w-md p-6">
             <div className="flex items-center mb-6">
-              <h3 className="text-xl font-serif text-gold text-center flex-1">深蓝加点</h3>
-              <button onClick={() => setIsAddingSlot(false)} className="text-paper/60 hover:text-paper">
+              <h3 className="text-xl font-serif text-gold text-center flex-1">增寰</h3>
+              <button onClick={() => setIsZengHuanOpen(false)} className="text-paper/60 hover:text-paper">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleSlotSubmit} className="space-y-4">
+            <form onSubmit={handleZengHuanSubmit} className="space-y-4">
+              {/* 封面图片 */}
               <div>
-                <label className="block text-sm text-paper/70 mb-2">选择槽位</label>
-                <select
-                  value={slotForm.slotIndex}
-                  onChange={(e) => setSlotForm({ ...slotForm, slotIndex: parseInt(e.target.value) })}
-                  className="w-full bg-ink/50 border border-gold/30 rounded-lg px-4 py-2 text-paper focus:outline-none focus:border-gold appearance-none"
-                >
-                  {readingSlots.map((_, i) => (
-                    <option key={i} value={i} className="bg-ink">第 {i + 1} 格 {readingSlots[i] ? '(已占用)' : '(空)'}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-paper/70 mb-2">图片文件</label>
+                <label className="block text-sm text-paper/70 mb-2">图片</label>
                 <div
                   className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
-                  onClick={() => document.getElementById('slot-upload')?.click()}
+                  onClick={() => document.getElementById('zenghuan-cover-upload')?.click()}
                 >
                   <input
-                    id="slot-upload"
+                    id="zenghuan-cover-upload"
                     type="file"
                     accept="image/*"
                     className="hidden"
@@ -323,17 +370,17 @@ export default function BookGrid() {
                       const file = e.target.files?.[0];
                       if (file) {
                         const base64 = await fileToBase64(file);
-                        setSlotForm({ ...slotForm, url: base64 });
+                        setZengHuanForm({ ...zengHuanForm, imageUrl: base64 });
                       }
                     }}
                   />
-                  {slotForm.url ? (
+                  {zengHuanForm.imageUrl ? (
                     <div className="relative">
-                      <img src={slotForm.url} alt="" className="w-full h-24 object-cover rounded" />
+                      <img src={zengHuanForm.imageUrl} alt="" className="w-full h-24 object-cover rounded" />
                       <button
                         type="button"
                         className="absolute top-1 right-1 p-1 bg-black/50 rounded"
-                        onClick={(e) => { e.stopPropagation(); setSlotForm({ ...slotForm, url: '' }); }}
+                        onClick={(e) => { e.stopPropagation(); setZengHuanForm({ ...zengHuanForm, imageUrl: '' }); }}
                       >
                         <X size={14} className="text-paper" />
                       </button>
@@ -346,11 +393,68 @@ export default function BookGrid() {
                   )}
                 </div>
               </div>
+              
+              {/* 统计信息 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-paper/70 mb-2">年份</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={zengHuanForm.totalYears || ''}
+                    onChange={(e) => setZengHuanForm({ ...zengHuanForm, totalYears: Number(e.target.value) || 0 })}
+                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-paper/70 mb-2">读过多少本</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={zengHuanForm.totalBooks || ''}
+                    onChange={(e) => setZengHuanForm({ ...zengHuanForm, totalBooks: Number(e.target.value) || 0 })}
+                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm text-paper/70 mb-2">阅读总计</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="小时"
+                      value={zengHuanForm.totalHours || ''}
+                      onChange={(e) => setZengHuanForm({ ...zengHuanForm, totalHours: Number(e.target.value) || 0 })}
+                      className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      placeholder="分钟"
+                      value={zengHuanForm.totalMinutes || ''}
+                      onChange={(e) => setZengHuanForm({ ...zengHuanForm, totalMinutes: Number(e.target.value) || 0 })}
+                      className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                    />
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm text-paper/70 mb-2">阅读天数</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={zengHuanForm.readingDays || ''}
+                    onChange={(e) => setZengHuanForm({ ...zengHuanForm, readingDays: Number(e.target.value) || 0 })}
+                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                  />
+                </div>
+              </div>
+              
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setIsAddingSlot(false)} className="flex-1 btn-secondary">
+                <button type="button" onClick={() => setIsZengHuanOpen(false)} className="flex-1 btn-secondary">
                   取消
                 </button>
-                <button type="submit" disabled={!slotForm.url.trim()} className="flex-1 btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
+                <button type="submit" disabled={!zengHuanForm.imageUrl.trim()} className="flex-1 btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                   确定
                 </button>
               </div>
