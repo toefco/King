@@ -107,6 +107,14 @@ function getInitialState(): AppStateData {
   return { ...defaultEmptyData };
 }
 
+// 清理所有 localStorage 数据（用于重置）
+export function clearLocalStorageData(): void {
+  localStorage.removeItem(OWNER_DATA_KEY);
+  localStorage.removeItem('talent-showcase-visitor-limit');
+  localStorage.removeItem('talent-showcase-media-cache');
+  console.log('[数据已清空]');
+}
+
 /* ─── State 接口 ─────────────────────────────────────────────────────────── */
 
 interface AppState extends AppStateData {

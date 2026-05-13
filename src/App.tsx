@@ -3,15 +3,15 @@ import { useEffect, useState } from 'react';
 import { Header, SpaceBackground } from './components/Layout';
 import { HomePage, FitnessPage, WisdomPage, SpiritPage, SkillsPage, HobbiesPage, TimePage } from './pages';
 import { AiSprite } from './components/shared/AiSprite';
+import { useDataSync } from './hooks/useDataSync';
 
 function App() {
   const [isReady, setIsReady] = useState(false);
+  useDataSync();
 
   useEffect(() => {
-    // 强制跳转到首页
     const currentPath = window.location.pathname;
     if (currentPath !== '/' && currentPath !== '') {
-      // 延迟一点确保页面完全加载
       setTimeout(() => {
         window.location.href = '/';
       }, 100);
@@ -20,7 +20,6 @@ function App() {
     }
   }, []);
 
-  // 如果还没准备好，不渲染主要内容
   if (!isReady) {
     return (
       <div className="flex flex-col min-h-screen overflow-x-hidden">
@@ -31,7 +30,6 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
-      {/* 全局共用星空画布：放在路由外面，切换页面不销毁重建 */}
       <SpaceBackground />
       <Header />
       <main className="flex-1">
@@ -46,7 +44,6 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      {/* 全站共用智能复盘精灵 */}
       <AiSprite />
     </div>
   );
