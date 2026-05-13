@@ -34,9 +34,16 @@ export default function BookGrid() {
   const [thoughts, setThoughts] = useState('');
   const today = new Date().toISOString().split('T')[0];
   const [form, setForm] = useState({
+    title: '',
+    category: '',
     coverUrl: '',
     dataUrl: '',
     readDate: today,
+    totalHours: 0,
+    totalMinutes: 0,
+    readingDays: 0,
+    maxDailyHours: 0,
+    maxDailyMinutes: 0,
   });
   const [slotForm, setSlotForm] = useState({
     slotIndex: 0,
@@ -84,13 +91,14 @@ export default function BookGrid() {
     e.preventDefault();
     const book: Book = {
       id: Date.now().toString(),
-      title: '',
+      title: form.title || '未命名',
+      category: form.category,
       author: '',
       ...form,
       status: 'completed',
     };
     addBook(book);
-    setForm({ coverUrl: '', dataUrl: '', readDate: today });
+    setForm({ title: '', category: '', coverUrl: '', dataUrl: '', readDate: today, totalHours: 0, totalMinutes: 0, readingDays: 0, maxDailyHours: 0, maxDailyMinutes: 0 });
     setIsAdding(false);
   };
 
@@ -317,6 +325,36 @@ export default function BookGrid() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
+                <label className="block text-sm text-paper/70 mb-2">书籍名称</label>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="输入书籍名称"
+                  className="w-full bg-ink/50 border border-gold/30 rounded-lg px-4 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-paper/70 mb-2">书籍分类</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="w-full bg-ink/50 border border-gold/30 rounded-lg px-4 py-2 text-paper focus:outline-none focus:border-gold"
+                >
+                  <option value="">选择分类</option>
+                  <option value="哲学">哲学</option>
+                  <option value="文学">文学</option>
+                  <option value="历史">历史</option>
+                  <option value="心理">心理</option>
+                  <option value="商业">商业</option>
+                  <option value="科技">科技</option>
+                  <option value="艺术">艺术</option>
+                  <option value="社科">社科</option>
+                  <option value="生活">生活</option>
+                  <option value="其他">其他</option>
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm text-paper/70 mb-2">封面图片</label>
                 <div
                   className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
@@ -400,6 +438,64 @@ export default function BookGrid() {
                   onChange={(e) => setForm({ ...form, readDate: e.target.value })}
                   className="w-full bg-ink/50 border border-gold/30 rounded-lg px-4 py-2 text-paper focus:outline-none focus:border-gold"
                 />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                  <label className="block text-sm text-paper/70 mb-2">累计时长</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="时"
+                      value={form.totalHours || ''}
+                      onChange={(e) => setForm({ ...form, totalHours: Number(e.target.value) || 0 })}
+                      className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      placeholder="分"
+                      value={form.totalMinutes || ''}
+                      onChange={(e) => setForm({ ...form, totalMinutes: Number(e.target.value) || 0 })}
+                      className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-paper/70 mb-2">阅读天数</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.readingDays}
+                    onChange={(e) => setForm({ ...form, readingDays: Number(e.target.value) })}
+                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper focus:outline-none focus:border-gold"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-sm text-paper/70 mb-2">单日最久</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="时"
+                      value={form.maxDailyHours || ''}
+                      onChange={(e) => setForm({ ...form, maxDailyHours: Number(e.target.value) || 0 })}
+                      className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      placeholder="分"
+                      value={form.maxDailyMinutes || ''}
+                      onChange={(e) => setForm({ ...form, maxDailyMinutes: Number(e.target.value) || 0 })}
+                      className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                    />
+                  </div>
+                </div>
               </div>
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setIsAdding(false)} className="flex-1 btn-secondary">
@@ -539,7 +635,7 @@ export default function BookGrid() {
               </span>
               <div className="h-px flex-1 bg-gold/10" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4">
               {group.books.map((book) => (
                 <BookCard key={book.id} book={book} onImageClick={openModal} />
               ))}

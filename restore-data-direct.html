@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据恢复工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+        .status-box.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .status-box.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .data-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        .data-label {
+            color: #666;
+        }
+        .data-value {
+            font-weight: 600;
+            color: #333;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 数据恢复工具</h1>
+        <p class="subtitle">一键恢复你的个人数据</p>
+        
+        <div id="status" class="status-box">
+            <p>准备就绪，请点击下方按钮恢复数据</p>
+        </div>
+        
+        <button id="restoreBtn">🔄 恢复数据</button>
+        
+        <a href="http://localhost:5184" class="link" id="gotoLink" style="display: none;">
+            ✨ 数据恢复成功！点击这里前往应用
+        </a>
+    </div>
+
+    <script>
+        // 从备份数据中提取用户数据
+        // 这里使用备份数据的结构
+        const backupData = {
+            "user_mp3sb595owl3pyqqx9o": {
+                "data": {
+                    "version": 6,
+                    "exportedAt": "2026-05-13T14:08:10.613Z",
+                    "talents": [],
+                    "fitnessTests": [],
+                    "workouts": [
+                        {"id":"1778665683663","exercise":"腿屈伸","weight":20,"sets":5,"reps":20,"date":"2026-05-11"},
+                        {"id":"1778665619755","exercise":"腿弯举","weight":15,"sets":5,"reps":20,"date":"2026-05-11"},
+                        {"id":"1778665597128","exercise":"器械反向飞鸟","weight":10,"sets":5,"reps":12,"date":"2026-05-11"},
+                        {"id":"1778665572362","exercise":"哑铃飞鸟","weight":2.5,"sets":5,"reps":12,"date":"2026-05-11"},
+                        {"id":"1778665552289","exercise":"塔式实力推","weight":30,"sets":5,"reps":12,"date":"2026-05-11"},
+                        {"id":"1778665453732","exercise":"杠铃弯举","weight":10,"sets":5,"reps":12,"date":"2026-05-09"},
+                        {"id":"1778665420023","exercise":"坐姿划船","weight":40,"sets":4,"reps":8,"date":"2026-05-09"},
+                        {"id":"1778665407950","exercise":"高位下拉","weight":40,"sets":4,"reps":8,"date":"2026-05-09"},
+                        {"id":"1778665392474","exercise":"引体向上","weight":1,"sets":4,"reps":8,"date":"2026-05-09"},
+                        {"id":"1778665376225","exercise":"杠铃臂屈伸","weight":10,"sets":5,"reps":12,"date":"2026-05-08"},
+                        {"id":"1778665349275","exercise":"蝴蝶夹胸","weight":25,"sets":4,"reps":8,"date":"2026-05-08"},
+                        {"id":"1778665304697","exercise":"器械推胸","weight":30,"sets":4,"reps":8,"date":"2026-05-08"},
+                        {"id":"1778665233337","exercise":"杠铃卧推","weight":40,"sets":4,"reps":8,"date":"2026-05-08"},
+                        {"id":"1778665205284","exercise":"坐姿划船","weight":40,"sets":4,"reps":8,"date":"2026-05-07"},
+                        {"id":"1778665186890","exercise":"高位下拉","weight":40,"sets":4,"reps":8,"date":"2026-05-07"},
+                        {"id":"1778665158323","exercise":"引体向上","weight":1,"sets":4,"reps":8,"date":"2026-05-07"},
+                        {"id":"1778665145767","exercise":"器械推胸","weight":30,"sets":4,"reps":8,"date":"2026-05-07"},
+                        {"id":"1778665125403","exercise":"杠铃卧推","weight":40,"sets":4,"reps":8,"date":"2026-05-07"}
+                    ],
+                    "books": [
+                        {"id":"1778675395340","title":"孙子兵法","category":"社科","author":"","coverUrl":"","dataUrl":"","readDate":"2026-01-30","totalHours":1,"totalMinutes":57,"readingDays":5,"maxDailyHours":0,"maxDailyMinutes":35,"status":"completed"},
+                        {"id":"1778675339031","title":"悉达多","category":"文学","author":"","coverUrl":"","dataUrl":"","readDate":"2026-01-30","totalHours":3,"totalMinutes":1,"readingDays":2,"maxDailyHours":1,"maxDailyMinutes":58,"status":"completed"},
+                        {"id":"1778675273629","title":"像水一样吧，朋友","category":"心理","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-30","totalHours":11,"totalMinutes":8,"readingDays":10,"maxDailyHours":2,"maxDailyMinutes":48,"status":"completed"},
+                        {"id":"1778675194951","title":"野草","category":"文学","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-24","totalHours":2,"totalMinutes":40,"readingDays":2,"maxDailyHours":1,"maxDailyMinutes":23,"status":"completed"},
+                        {"id":"1778675157867","title":"身体革命：八种间歇性生活法","category":"心理","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-27","totalHours":3,"totalMinutes":38,"readingDays":4,"maxDailyHours":1,"maxDailyMinutes":42,"status":"completed"},
+                        {"id":"1778675100818","title":"快乐主义","category":"心理","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-17","totalHours":4,"totalMinutes":55,"readingDays":5,"maxDailyHours":1,"maxDailyMinutes":40,"status":"completed"},
+                        {"id":"1778675023741","title":"乡土中国","category":"社科","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-12","totalHours":11,"totalMinutes":20,"readingDays":10,"maxDailyHours":3,"maxDailyMinutes":12,"status":"completed"},
+                        {"id":"1778674960348","title":"设计你最好的一年","category":"心理","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-04","totalHours":5,"totalMinutes":43,"readingDays":2,"maxDailyHours":3,"maxDailyMinutes":0,"status":"completed"},
+                        {"id":"1778674846903","title":"共产主义原理","category":"社科","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-03","totalHours":2,"totalMinutes":19,"readingDays":2,"maxDailyHours":1,"maxDailyMinutes":25,"status":"completed"},
+                        {"id":"1778674791779","title":"皇权与绅权","category":"社科","author":"","coverUrl":"","dataUrl":"","readDate":"2026-03-01","totalHours":5,"totalMinutes":7,"readingDays":4,"maxDailyHours":2,"maxDailyMinutes":31,"status":"completed"},
+                        {"id":"1778674721661","title":"金融学从入门到精通","category":"商业","author":"","coverUrl":"","dataUrl":"","readDate":"2026-02-28","totalHours":6,"totalMinutes":42,"readingDays":3,"maxDailyHours":3,"maxDailyMinutes":15,"status":"completed"}
+                    ],
+                    "timeLogs": [],
+                    "habits": [],
+                    "spiritArticles": [],
+                    "skills": []
+                }
+            }
+        };
+
+        // 获取用户数据
+        const userKey = Object.keys(backupData)[0];
+        const appData = backupData[userKey].data;
+
+        const restoreBtn = document.getElementById('restoreBtn');
+        const statusDiv = document.getElementById('status');
+        const gotoLink = document.getElementById('gotoLink');
+
+        restoreBtn.addEventListener('click', async function() {
+            try {
+                restoreBtn.disabled = true;
+                restoreBtn.textContent = '⏳ 正在恢复...';
+                
+                // 保存到 localStorage
+                const KEY = 'talent-showcase-owner-data';
+                localStorage.setItem(KEY, JSON.stringify(appData));
+                
+                // 显示成功
+                statusDiv.className = 'status-box success';
+                statusDiv.innerHTML = `
+                    <p><strong>🎉 数据恢复成功！</strong></p>
+                    <div class="data-info">
+                        <div class="data-item">
+                            <span class="data-label">书籍数量</span>
+                            <span class="data-value">${appData.books?.length || 0} 本</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">运动记录</span>
+                            <span class="data-value">${appData.workouts?.length || 0} 条</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">导出时间</span>
+                            <span class="data-value">${appData.exportedAt}</span>
+                        </div>
+                    </div>
+                `;
+                
+                restoreBtn.textContent = '✅ 已恢复';
+                gotoLink.style.display = 'block';
+                
+            } catch (error) {
+                statusDiv.className = 'status-box error';
+                statusDiv.innerHTML = `<p><strong>❌ 恢复失败</strong></p><p>${error.message}</p>`;
+                restoreBtn.disabled = false;
+                restoreBtn.textContent = '🔄 恢复数据';
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

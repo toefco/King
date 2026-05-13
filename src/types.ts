@@ -34,11 +34,17 @@ export interface Book {
   id: string;
   title: string;
   author: string;
+  category: string;
   coverUrl: string;
   dataUrl?: string;
   status: 'reading' | 'completed' | 'planned';
   readDate?: string;
   thoughts?: string;
+  totalHours?: number;
+  totalMinutes?: number;
+  readingDays?: number;
+  maxDailyHours?: number;
+  maxDailyMinutes?: number;
 }
 
 export interface YearSummary {

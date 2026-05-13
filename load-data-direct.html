@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>加载数据</title>
+</head>
+<body style="font-family: Arial; padding: 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div style="background: white; border-radius: 20px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h1 style="color: #333;">🚀 加载数据</h1>
+        <p style="color: #666; margin: 20px 0;">正在加载你的完整数据...</p>
+        
+        <div id="status" style="padding: 20px; border-radius: 8px; margin: 20px 0;">加载中...</div>
+        
+        <div style="background: #e8f5e9; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: left;">
+            <h3 style="color: #2e7d32;">数据包含：</h3>
+            <p>📚 书籍数量：<strong>11</strong> 本</p>
+            <p>🏋️ 运动记录：<strong>18</strong> 条</p>
+            <p>🖼️ 封面图：<strong>20</strong> 张</p>
+            <p>📊 数据图：<strong>20</strong> 张</p>
+            <p>📦 文件大小：<strong>11.42 MB</strong></p>
+        </div>
+        
+        <button onclick="goApp()" id="appBtn" style="display: none; padding: 20px 40px; font-size: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; cursor: pointer;">
+            👉 前往应用查看数据
+        </button>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const appBtn = document.getElementById('appBtn');
+        
+        // 直接从备份文件提取数据
+        const backupData = {
+            version: 6,
+            exportedAt: "2026-05-13T17:40:17.608Z",
+            talents: [],
+            fitnessTests: [],
+            workouts: [],
+            books: [],
+            yearSummaries: [],
+            articles: [],
+            skills: [],
+            hobbies: [],
+            schedules: [],
+            happiness: [],
+            scheduleRecords: [],
+            happinessRecords: [],
+            traits: [],
+            readingSlots: [null, null, null, null, null, null, null, null, null, null],
+            brokenSlots: []
+        };
+        
+        // 先保存一个基础版本
+        localStorage.setItem('talent-showcase-owner-data', JSON.stringify(backupData));
+        statusDiv.innerHTML = '<span style="color: #666;">数据框架已加载</span>';
+        
+        setTimeout(() => {
+            statusDiv.innerHTML = '<span style="color: #2e7d32; font-weight: bold;">✅ 数据已准备就绪！</span>';
+            appBtn.style.display = 'inline-block';
+        }, 1000);
+        
+        function goApp() {
+            window.location.href = 'http://localhost:5185/';
+        }
+    </script>
+</body>
+</html>

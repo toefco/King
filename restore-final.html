@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据恢复工具 - 最简版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #333; font-size: 28px; margin-bottom: 10px; text-align: center; }
+        .subtitle { color: #666; text-align: center; margin-bottom: 30px; }
+        .info-box {
+            background: #f0f8ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #b8daff;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .info-item:last-child { border-bottom: none; }
+        .info-label { color: #666; font-weight: 500; }
+        .info-value { color: #333; font-weight: 700; font-size: 18px; }
+        button {
+            width: 100%;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);
+        }
+        button:active { transform: translateY(0); }
+        .success {
+            background: #d4edda !important;
+            color: #155724 !important;
+        }
+        .instructions {
+            background: #fff3cd;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #856404;
+        }
+        .instructions strong { display: block; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 数据恢复工具</h1>
+        <p class="subtitle">一键恢复你的所有数据</p>
+        
+        <div class="info-box">
+            <div class="info-item">
+                <span class="info-label">📚 书籍数量</span>
+                <span class="info-value">11 本</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🏋️ 运动记录</span>
+                <span class="info-value">18 条</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">📅 备份时间</span>
+                <span class="info-value">2026-05-13</span>
+            </div>
+        </div>
+        
+        <button id="restoreBtn" onclick="restoreData()">🚀 一键恢复数据</button>
+        
+        <div class="instructions">
+            <strong>💡 恢复后操作：</strong>
+            1. 点击上方按钮<br>
+            2. 看到"恢复成功"提示<br>
+            3. 打开应用查看数据：<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong>http://localhost:5185/</strong>
+        </div>
+    </div>
+
+    <script>
+        const KEY = 'talent-showcase-owner-data';
+        const btn = document.getElementById('restoreBtn');
+        
+        async function restoreData() {
+            btn.disabled = true;
+            btn.textContent = '⏳ 正在恢复...';
+            
+            try {
+                // 从我们的恢复服务器获取数据
+                const response = await fetch('http://localhost:3002/api/data/user_mp3sb595owl3pyqqx9o');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // 保存到 localStorage
+                    localStorage.setItem(KEY, JSON.stringify(result.data));
+                    
+                    // 成功提示
+                    btn.classList.add('success');
+                    btn.textContent = '✅ 恢复成功！请刷新应用页面';
+                    btn.onclick = () => {
+                        window.open('http://localhost:5185/', '_blank');
+                    };
+                } else {
+                    throw new Error(result.message || '获取数据失败');
+                }
+            } catch (error) {
+                btn.textContent = '❌ 恢复失败: ' + error.message;
+                btn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

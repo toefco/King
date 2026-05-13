@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据导出</title>
+</head>
+<body>
+    <h1>点击下面的按钮导出数据</h1>
+    <button onclick="exportData()" style="padding: 20px; font-size: 20px; cursor: pointer;">
+        导出数据
+    </button>
+    <div id="result" style="margin-top: 20px; padding: 20px; border: 1px solid #ccc;"></div>
+    
+    <script>
+        function exportData() {
+            const result = document.getElementById('result');
+            result.innerHTML = '正在读取数据...';
+            
+            try {
+                const data = localStorage.getItem('talent-showcase-owner-data');
+                
+                if (!data) {
+                    result.innerHTML = '<span style="color: red;">❌ 未找到数据</span>';
+                    return;
+                }
+                
+                // 分析数据
+                const parsed = JSON.parse(data);
+                const books = parsed.books || [];
+                const workouts = parsed.workouts || [];
+                const booksWithImages = books.filter(b => b.coverUrl || b.dataUrl).length;
+                
+                result.innerHTML = `
+                    <h2>✅ 找到数据！</h2>
+                    <p>📚 书籍数量: <strong>${books.length}</strong> 本</p>
+                    <p>🏋️ 运动记录: <strong>${workouts.length}</strong> 条</p>
+                    <p>🖼️ 有图片的书籍: <strong>${booksWithImages}</strong> 本</p>
+                    <p style="margin-top: 20px;">数据大小: <strong>${(new Blob([data]).size / 1024 / 1024).toFixed(2)}</strong> MB</p>
+                    <button onclick="downloadFile()" style="margin-top: 20px; padding: 15px 30px; font-size: 18px;">
+                        下载JSON文件
+                    </button>
+                `;
+                
+                // 保存到全局变量
+                window.exportData = data;
+                
+            } catch (error) {
+                result.innerHTML = '<span style="color: red;">❌ 错误: ' + error.message + '</span>';
+            }
+        }
+        
+        function downloadFile() {
+            if (!window.exportData) {
+                alert('请先点击"导出数据"按钮');
+                return;
+            }
+            
+            const blob = new Blob([window.exportData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'backup-' + new Date().toISOString().split('T')[0] + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 页面加载时自动导出
+        window.onload = exportData;
+    </script>
+</body>
+</html>

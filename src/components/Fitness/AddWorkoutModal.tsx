@@ -72,7 +72,7 @@ export default function AddWorkoutModal({ isOpen, onClose }: Props) {
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label style={{ display: 'block', fontSize: '13px', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>功法</label>
+            <label style={{ display: 'block', fontSize: '15px', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>功法</label>
             <input
               type="text"
               value={form.exercise}
@@ -129,7 +129,7 @@ export default function AddWorkoutModal({ isOpen, onClose }: Props) {
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '13px', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>组数</label>
+              <label style={{ display: 'block', fontSize: '15px', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>组数</label>
               <input
                 type="number"
                 value={form.sets}
@@ -185,7 +185,7 @@ export default function AddWorkoutModal({ isOpen, onClose }: Props) {
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '13px', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>日期</label>
+              <label style={{ display: 'block', fontSize: '15px', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>日期</label>
               <input
                 type="date"
                 value={form.date}

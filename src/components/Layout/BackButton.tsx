@@ -1,8 +1,67 @@
-import { Link } from 'react-router-dom';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function BackButton() {
+  const navigate = useNavigate();
+  const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [hasMoved, setHasMoved] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setHasMoved(false);
+    dragOffset.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+  }, [position.x, position.y]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging) return;
+    
+    const newX = Math.max(8, Math.min(window.innerWidth - 96, e.clientX - dragOffset.current.x));
+    const newY = Math.max(8, Math.min(window.innerHeight - 96, e.clientY - dragOffset.current.y));
+    
+    const moved = Math.abs(newX - position.x) > 5 || Math.abs(newY - position.y) > 5;
+    if (moved) setHasMoved(true);
+    
+    setPosition({ x: newX, y: newY });
+  }, [isDragging, position.x, position.y]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (!hasMoved) {
+      navigate('/');
+    }
+  }, [hasMoved, navigate]);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
   return (
-    <div className="fixed z-50" style={{ top: '16px', left: '16px' }}>
+    <div
+      ref={buttonRef}
+      className={`fixed z-50 cursor-move transition-shadow duration-200 ${isDragging ? 'shadow-2xl scale-105' : 'shadow-lg'}`}
+      style={{
+        left: position.x,
+        top: position.y,
+        transform: isDragging ? 'rotate(5deg)' : 'rotate(0deg)',
+        transition: isDragging ? 'none' : 'transform 0.2s ease',
+      }}
+      onMouseDown={handleMouseDown}
+    >
       <style>{`
         .back-button-wrapper {
           width: 80px;
@@ -12,15 +71,14 @@ export default function BackButton() {
           .back-button-wrapper {
             width: 60px;
             height: 60px;
-            margin-top: 54px;
           }
           .back-button-text {
             font-size: 24px !important;
           }
         }
       `}</style>
-      <Link
-        to="/"
+      <button
+        onClick={handleClick}
         className="back-button-wrapper relative flex items-center justify-center rounded-full group"
         style={{
           background: 'radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.02) 100%)',
@@ -112,7 +170,7 @@ export default function BackButton() {
             boxShadow: '0 0 4px rgba(255,255,255,0.4)',
           }}
         />
-      </Link>
+      </button>
     </div>
   );
 }

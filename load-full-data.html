@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>加载完整数据</title>
+</head>
+<body style="font-family: Arial; padding: 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div style="background: white; border-radius: 20px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h1 style="color: #333;">🚀 加载完整数据</h1>
+        <p style="color: #666; margin: 20px 0;">正在把完整数据...</p>
+        
+        <div id="status" style="padding: 20px; border-radius: 8px; margin: 20px 0; background: #e8f5e9; color: #2e7d32;">请稍候...</div>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px 0; text-align: left;">
+            <strong>说明：</strong>这个页面会加载你的完整数据（包括书籍、运动记录等所有内容！
+        </div>
+        
+        <button onclick="goApp()" id="appBtn" style="display: none; padding: 20px 40px; font-size: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; cursor: pointer; margin-top: 20px;">
+            👉 前往应用查看所有数据
+        </button>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const appBtn = document.getElementById('appBtn');
+        
+        // 直接从服务器获取完整数据
+        async function loadFullData() {
+            try {
+                statusDiv.textContent = '正在从服务器获取数据...';
+                
+                const response = await fetch('http://localhost:3002/api/data/user_mp3sb595owl3pyqqx9o');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    statusDiv.textContent = '保存数据到浏览器...';
+                    
+                    localStorage.setItem('talent-showcase-owner-data', JSON.stringify(result.data));
+                    
+                    statusDiv.innerHTML = '<strong>✅ 完整数据已加载！包括所有书籍、运动记录、全部恢复！';
+                    appBtn.style.display = 'inline-block';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:5185/';
+                    }, 1500);
+                } else {
+                    statusDiv.innerHTML = '<span style="color: red;">❌ 加载失败：数据未找到</span>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<span style="color: red;">❌ 错误: ' + error.message + '</span>';
+            }
+        }
+        
+        function goApp() {
+            window.location.href = 'http://localhost:5185/';
+        }
+        
+        // 页面加载时自动加载数据
+        window.onload = function() {
+            loadFullData();
+        };
+    </script>
+</body>
+</html>

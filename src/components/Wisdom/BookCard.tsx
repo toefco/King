@@ -99,7 +99,7 @@ export default function BookCard({ book, onImageClick }: Props) {
 
         {/* 左：封面 */}
         <div
-          className="w-1/2 h-full flex-shrink-0 overflow-hidden cursor-pointer"
+          className="w-1/2 h-full flex-shrink-0 overflow-hidden cursor-pointer relative"
           onClick={() => onImageClick(book, 'cover')}
         >
           <img
@@ -110,9 +110,17 @@ export default function BookCard({ book, onImageClick }: Props) {
             className="w-full h-full object-cover object-top"
             style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.06)' : 'scale(1)' }}
           />
-          {/* Separator glow line */}
-          <div className="absolute top-0 bottom-0 left-1/2 w-px z-10 pointer-events-none"
-            style={{ background: 'linear-gradient(180deg, transparent, rgba(212,175,55,0.3), transparent)' }} />
+          {/* Bottom shadow overlay */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/5 z-10 pointer-events-none"
+            style={{
+              background: 'linear-gradient(0deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.4) 65%, transparent 100%)'
+            }} />
+          {/* Separator line on right edge */}
+          <div className="absolute top-0 bottom-0 right-0 w-1 z-10 pointer-events-none"
+            style={{ 
+              background: 'linear-gradient(180deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.8) 15%, rgba(212,175,55,0.95) 50%, rgba(212,175,55,0.8) 85%, rgba(212,175,55,0.05) 100%)',
+              boxShadow: '0 0 12px rgba(212,175,55,0.5), 0 0 24px rgba(212,175,55,0.3), inset 0 0 4px rgba(255,255,255,0.3)'
+            }} />
         </div>
 
         {/* 右：数据图 */}
@@ -137,11 +145,11 @@ export default function BookCard({ book, onImageClick }: Props) {
               <BookOpen size={26} style={{ color: 'rgba(212,175,55,0.2)' }} />
             </div>
           )}
-          {/* Left edge gradient overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: 'linear-gradient(to right, rgba(26,26,46,0.45) 0%, transparent 35%)' }}
-          />
+          {/* Bottom shadow overlay */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/5 z-10 pointer-events-none"
+            style={{
+              background: 'linear-gradient(0deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.4) 65%, transparent 100%)'
+            }} />
         </div>
       </div>
 

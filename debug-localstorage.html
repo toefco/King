@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>调试 localStorage</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+    }
+    .container {
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 16px;
+      padding: 30px;
+    }
+    h1 { margin-top: 0; }
+    .box {
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .success { border-left: 4px solid #22c55e; }
+    .warning { border-left: 4px solid #eab308; }
+    .error { border-left: 4px solid #ef4444; }
+    pre {
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 4px;
+    }
+    button.danger { background: #ef4444; }
+    button.success { background: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 调试 localStorage 数据</h1>
+    
+    <div id="status"></div>
+    
+    <div class="box">
+      <h3>localStorage 键</h3>
+      <pre id="keys"></pre>
+    </div>
+    
+    <div class="box">
+      <h3>talent-showcase-owner-data 内容</h3>
+      <pre id="data"></pre>
+    </div>
+    
+    <div style="margin-top:20px;">
+      <button onclick="checkData()">检查数据</button>
+      <button class="success" onclick="restoreCorrectData()">恢复正确数据</button>
+      <button class="danger" onclick="clearData()">清空数据</button>
+    </div>
+  </div>
+
+  <script>
+    // 这里放入我们的正确数据
+    const correctData = ${JSON.stringify(require('./restore-data.json'))};
+    
+    function checkData() {
+      const statusEl = document.getElementById('status');
+      const keysEl = document.getElementById('keys');
+      const dataEl = document.getElementById('data');
+      
+      const allKeys = Object.keys(localStorage);
+      keysEl.textContent = JSON.stringify(allKeys, null, 2);
+      
+      const ownerData = localStorage.getItem('talent-showcase-owner-data');
+      
+      if (ownerData) {
+        try {
+          const parsed = JSON.parse(ownerData);
+          statusEl.innerHTML = '<div class="box success">✅ 找到 owner data！</div>';
+          dataEl.textContent = JSON.stringify(parsed, null, 2).substring(0, 5000) + (JSON.stringify(parsed).length > 5000 ? '\n\n... (数据被截断)' : '');
+          
+          console.log('书籍数量:', parsed.books?.length);
+          console.log('运动记录:', parsed.workouts?.length);
+        } catch(e) {
+          statusEl.innerHTML = '<div class="box error">❌ 数据解析失败: ' + e.message + '</div>';
+          dataEl.textContent = ownerData;
+        }
+      } else {
+        statusEl.innerHTML = '<div class="box warning">⚠️ 没有找到 owner data</div>';
+        dataEl.textContent = '(空)';
+      }
+    }
+    
+    function restoreCorrectData() {
+      localStorage.setItem('talent-showcase-owner-data', JSON.stringify(correctData));
+      alert('✅ 数据已恢复！请刷新应用页面！');
+      checkData();
+    }
+    
+    function clearData() {
+      if (confirm('确定要清空数据吗？')) {
+        localStorage.removeItem('talent-showcase-owner-data');
+        checkData();
+      }
+    }
+    
+    // 页面加载时自动检查
+    checkData();
+  </script>
+</body>
+</html>

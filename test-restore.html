@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据恢复测试</title>
+</head>
+<body>
+    <h1>测试页面</h1>
+    <p>如果能看到这个页面，说明HTML正常加载</p>
+    <button onclick="test()">点击测试</button>
+    <div id="result"></div>
+    
+    <script>
+        function test() {
+            document.getElementById('result').innerHTML = '正在测试API...';
+            
+            fetch('http://localhost:3002/api/data/user_mp3sb595owl3pyqqx9o')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('result').innerHTML = `
+                        <h2>✅ API正常！</h2>
+                        <p>书籍数量: ${data.data.books.length}</p>
+                        <p>运动记录: ${data.data.workouts.length}</p>
+                        <button onclick="restore()">点击恢复数据</button>
+                    `;
+                })
+                .catch(err => {
+                    document.getElementById('result').innerHTML = '❌ API失败: ' + err;
+                });
+        }
+        
+        function restore() {
+            fetch('http://localhost:3002/api/data/user_mp3sb595owl3pyqqx9o')
+                .then(r => r.json())
+                .then(data => {
+                    localStorage.setItem('talent-showcase-owner-data', JSON.stringify(data.data));
+                    document.getElementById('result').innerHTML = '✅ 数据已恢复！请访问 http://localhost:5185/';
+                });
+        }
+    </script>
+</body>
+</html>

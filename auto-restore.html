@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>自动数据恢复</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #333; }
+        p { color: #666; margin: 20px 0; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏳ 正在恢复数据...</h1>
+        <p>请稍等，不要关闭此页面</p>
+    </div>
+
+    <script>
+        // 自动执行数据恢复
+        (async function() {
+            const KEY = 'talent-showcase-owner-data';
+            
+            try {
+                // 从API获取数据
+                const response = await fetch('http://localhost:3002/api/data/user_mp3sb595owl3pyqqx9o');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // 保存到localStorage
+                    localStorage.setItem(KEY, JSON.stringify(result.data));
+                    
+                    // 显示成功
+                    document.body.innerHTML = `
+                        <div class="container">
+                            <h1 class="success">✅ 数据恢复成功！</h1>
+                            <p>已恢复：</p>
+                            <p>📚 ${result.data.books?.length || 0} 本书籍</p>
+                            <p>🏋️ ${result.data.workouts?.length || 0} 条运动记录</p>
+                            <p style="margin-top: 30px;">3秒后自动跳转到应用...</p>
+                        </div>
+                    `;
+                    
+                    // 3秒后跳转到应用
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:5185/';
+                    }, 3000);
+                } else {
+                    throw new Error(result.message || '获取数据失败');
+                }
+            } catch (error) {
+                document.body.innerHTML = `
+                    <div class="container">
+                        <h1 class="error">❌ 恢复失败</h1>
+                        <p>错误信息：${error.message}</p>
+                        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                            请确保恢复服务器正在运行<br>
+                            （终端中运行：node data-recovery-server.js）
+                        </p>
+                    </div>
+                `;
+            }
+        })();
+    </script>
+</body>
+</html>

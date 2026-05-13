@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>最终数据恢复</title>
+</head>
+<body style="font-family: Arial; padding: 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div style="background: white; border-radius: 20px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h1 style="color: #333;">🎉 数据恢复工具</h1>
+        <p style="color: #666; margin: 20px 0;">你的数据包含完整图片！</p>
+        
+        <div style="background: #e8f5e9; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: left;">
+            <h3 style="color: #2e7d32;">✅ 数据统计：</h3>
+            <p>📚 书籍数量：<strong>11</strong> 本</p>
+            <p>🏋️ 运动记录：<strong>18</strong> 条</p>
+            <p>🖼️ 封面图：<strong>20</strong> 张</p>
+            <p>📊 数据图：<strong>20</strong> 张</p>
+            <p>📦 文件大小：<strong>11.42 MB</strong></p>
+        </div>
+        
+        <button onclick="restore()" style="padding: 20px 40px; font-size: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; cursor: pointer;">
+            🚀 一键恢复所有数据
+        </button>
+        
+        <p id="status" style="margin-top: 20px; color: #666;"></p>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left;">
+            <strong>⚠️ 注意：</strong><br>
+            请在浏览器中打开此页面：<br>
+            <a href="http://localhost:5185/" target="_blank">http://localhost:5185/</a><br><br>
+            或者直接访问：<a href="http://localhost:5185/wisdom">智慧系统</a>
+        </div>
+    </div>
+
+    <script>
+        async function restore() {
+            const status = document.getElementById('status');
+            status.textContent = '正在从本地文件读取数据...';
+            
+            try {
+                // 从服务器API获取数据
+                const response = await fetch('http://localhost:3002/api/data/user_mp3sb595owl3pyqqx9o');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    status.textContent = '正在保存数据到浏览器...';
+                    
+                    // 保存到localStorage
+                    localStorage.setItem('talent-showcase-owner-data', JSON.stringify(result.data));
+                    
+                    status.innerHTML = '<span style="color: green;">✅ 恢复成功！</span>';
+                    
+                    // 3秒后跳转到应用
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:5185/wisdom';
+                    }, 2000);
+                } else {
+                    throw new Error(result.message || '获取数据失败');
+                }
+            } catch (error) {
+                status.innerHTML = '<span style="color: red;">❌ 失败: ' + error.message + '</span>';
+            }
+        }
+        
+        // 页面加载时自动恢复
+        window.onload = function() {
+            setTimeout(restore, 1000);
+        };
+    </script>
+</body>
+</html>

@@ -172,6 +172,7 @@ async function imageToBase64(url: string): Promise<string | null> {
 async function analyzeImageContent(url: string, title: string): Promise<string> {
   const cache = getMediaCache();
   if (cache[url] && Date.now() - cache[url].timestamp < 7 * 24 * 60 * 60 * 1000) {
+    console.log('[图片分析] 使用缓存:', title);
     return cache[url].content;
   }
 
@@ -187,29 +188,36 @@ async function analyzeImageContent(url: string, title: string): Promise<string> 
   const API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
   try {
+    const requestBody = JSON.stringify({
+      model: 'deepseek-vision',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: `请详细分析这张图片，识别所有文字、图表、数据、笔记，并描述画面内容。标题：${title}` },
+            { type: 'image_url', image_url: { url: base64 } }
+          ]
+        }
+      ],
+      max_tokens: 2000,
+    });
+
+    console.log('[图片分析] 请求体大小:', requestBody.length, '字符');
+
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + API_KEY,
       },
-      body: JSON.stringify({
-        model: 'deepseek-vision',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: `请详细分析这张图片，识别所有文字、图表、数据、笔记，并描述画面内容。标题：${title}` },
-              { type: 'image_url', image_url: { url: base64 } }
-            ]
-          }
-        ],
-        max_tokens: 2000,
-      }),
+      body: requestBody,
     });
+
+    console.log('[图片分析] API响应状态:', response.status);
 
     if (response.ok) {
       const data = await response.json();
+      console.log('[图片分析] API响应数据:', JSON.stringify(data, null, 2).substring(0, 500) + '...');
       const content = data.choices[0]?.message?.content || '';
       console.log('[图片分析成功]', title, '内容长度:', content.length);
       const result = `[${title}] ${content}`;
@@ -218,11 +226,12 @@ async function analyzeImageContent(url: string, title: string): Promise<string> 
     } else {
       const errorData = await response.json().catch(() => ({}));
       console.error('[图片分析API错误]', response.status, errorData);
-      return `[图片分析失败] ${title}: API错误 ${response.status}`;
+      const errorMsg = errorData.error?.message || '未知错误';
+      return `[图片分析失败] ${title}: ${errorMsg}`;
     }
   } catch (e) {
     console.error('[图片分析异常]', e);
-    return `[图片分析异常] ${title}`;
+    return `[图片分析异常] ${title}: ${(e as Error).message || '网络错误'}`;
   }
 }
 
@@ -271,8 +280,20 @@ export async function formatUserDataForAI(): Promise<FormattedData> {
     state.books.forEach(b => {
       if (b) {
         dataText += '- 《' + (b.title || '未命名') + '》';
+        if (b.category) dataText += ' [' + b.category + ']';
         if (b.author) dataText += ' - ' + b.author;
         dataText += ' - 状态: ' + (b.status || '未知');
+        if (b.totalHours !== undefined || b.totalMinutes !== undefined) {
+          const hours = b.totalHours || 0;
+          const minutes = b.totalMinutes || 0;
+          dataText += ' | 累计时长: ' + hours + '小时' + (minutes > 0 ? minutes + '分' : '');
+        }
+        if (b.readingDays) dataText += ' | 阅读天数: ' + b.readingDays + '天';
+        if (b.maxDailyHours !== undefined || b.maxDailyMinutes !== undefined) {
+          const hours = b.maxDailyHours || 0;
+          const minutes = b.maxDailyMinutes || 0;
+          dataText += ' | 单日最久: ' + hours + '小时' + (minutes > 0 ? minutes + '分' : '');
+        }
         if (b.coverUrl) dataText += ' [有封面图片]';
         if (b.dataUrl) dataText += ' [有数据图片]';
         if (b.readDate) dataText += ' | 读完日期: ' + b.readDate;

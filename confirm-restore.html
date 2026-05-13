@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据恢复确认</title>
+</head>
+<body style="font-family: Arial; padding: 40px; text-align: center;">
+    <h1>✅ 数据恢复成功！</h1>
+    <div style="background: #e8f5e9; padding: 30px; border-radius: 12px; margin: 30px auto; max-width: 600px;">
+        <h2>📊 数据统计</h2>
+        <p>📚 书籍数量：<strong>11</strong> 本</p>
+        <p>🏋️ 运动记录：<strong>18</strong> 条</p>
+        <p>🖼️ 图片：需要重新上传</p>
+    </div>
+    
+    <div style="background: #fff3cd; padding: 20px; border-radius: 12px; margin: 30px auto; max-width: 600px; text-align: left;">
+        <h3>⚠️ 关于图片</h3>
+        <p>由于备份数据中没有包含图片，你辛辛苦苦上传的图片暂时无法恢复。</p>
+        <p style="margin-top: 15px;"><strong>解决方案：</strong></p>
+        <p>1. 书籍的文字信息已经完整保留</p>
+        <p>2. 可以重新为书籍上传封面图和数据图</p>
+        <p>3. 图片会自动保存到本地，不会再丢失</p>
+    </div>
+    
+    <div style="margin-top: 40px;">
+        <h2>👉 点击下方按钮查看应用</h2>
+        <button onclick="goToApp()" style="padding: 20px 40px; font-size: 20px; background: #667eea; color: white; border: none; border-radius: 12px; cursor: pointer;">
+            打开应用
+        </button>
+    </div>
+    
+    <script>
+        function goToApp() {
+            window.location.href = 'http://localhost:5185/wisdom';
+        }
+        
+        // 页面加载时自动跳转到应用
+        window.onload = function() {
+            setTimeout(goToApp, 2000);
+        };
+    </script>
+</body>
+</html>
