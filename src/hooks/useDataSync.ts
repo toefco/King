@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useStore } from '../store';
-import { saveUserData, syncUserData, fetchUserData } from './api';
+import { saveUserData, syncUserData, fetchUserData } from '../utils/api';
 
 const SYNC_INTERVAL = 30000;
 
