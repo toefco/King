@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, X, Image, Trash2, Upload, Edit2 } from 'lucide-react';
+import { Plus, X, Image, Trash2, Upload, Edit2, ExternalLink, Camera } from 'lucide-react';
 import { useStore } from '../../store';
 import { Book, YearSummary, ReadingSlotObject } from '../../types';
 import BookCard from './BookCard';
@@ -39,7 +39,11 @@ export default function BookGrid() {
     title: '',
     category: '',
     coverUrl: '',
+    coverLink: '',
+    coverMode: 'local' as 'local' | 'url',
     dataUrl: '',
+    dataLink: '',
+    dataMode: 'local' as 'local' | 'url',
     readDate: today,
     totalHours: 0,
     totalMinutes: 0,
@@ -48,11 +52,12 @@ export default function BookGrid() {
     maxDailyMinutes: 0,
   });
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
-  // 增寰弹窗状态
   const [isZengHuanOpen, setIsZengHuanOpen] = useState(false);
   const [zengHuanSlotIndex, setZengHuanSlotIndex] = useState<number>(0);
   const [zengHuanForm, setZengHuanForm] = useState({
     imageUrl: '',
+    imageLink: '',
+    imageMode: 'local' as 'local' | 'url',
     totalYears: 0,
     totalHours: 0,
     totalMinutes: 0,
@@ -106,17 +111,38 @@ export default function BookGrid() {
       status: 'completed',
     };
     addBook(book);
-    setForm({ title: '', category: '', coverUrl: '', dataUrl: '', readDate: today, totalHours: 0, totalMinutes: 0, readingDays: 0, maxDailyHours: 0, maxDailyMinutes: 0 });
+    setForm({ 
+      title: '', 
+      category: '', 
+      coverUrl: '', 
+      coverLink: '', 
+      coverMode: 'local', 
+      dataUrl: '', 
+      dataLink: '', 
+      dataMode: 'local', 
+      readDate: today, 
+      totalHours: 0, 
+      totalMinutes: 0, 
+      readingDays: 0, 
+      maxDailyHours: 0, 
+      maxDailyMinutes: 0 
+    });
     setIsAdding(false);
   };
 
   const openEditModal = (book: Book) => {
     setEditingBookId(book.id);
+    const isCoverUrl = book.coverUrl.startsWith('http');
+    const isDataUrl = book.dataUrl?.startsWith('http') || false;
     setForm({
       title: book.title,
       category: book.category,
-      coverUrl: book.coverUrl,
-      dataUrl: book.dataUrl || '',
+      coverUrl: isCoverUrl ? '' : book.coverUrl,
+      coverLink: isCoverUrl ? book.coverUrl : '',
+      coverMode: isCoverUrl ? 'url' : 'local',
+      dataUrl: isDataUrl ? '' : (book.dataUrl || ''),
+      dataLink: isDataUrl ? (book.dataUrl || '') : '',
+      dataMode: isDataUrl ? 'url' : 'local',
       readDate: book.readDate || today,
       totalHours: book.totalHours || 0,
       totalMinutes: book.totalMinutes || 0,
@@ -130,20 +156,43 @@ export default function BookGrid() {
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingBookId) {
-      updateBook(editingBookId, form);
+      const finalCoverUrl = form.coverMode === 'local' ? form.coverUrl : form.coverLink;
+      const finalDataUrl = form.dataMode === 'local' ? form.dataUrl : form.dataLink;
+      updateBook(editingBookId, {
+        ...form,
+        coverUrl: finalCoverUrl,
+        dataUrl: finalDataUrl,
+      });
     }
-    setForm({ title: '', category: '', coverUrl: '', dataUrl: '', readDate: today, totalHours: 0, totalMinutes: 0, readingDays: 0, maxDailyHours: 0, maxDailyMinutes: 0 });
+    setForm({ 
+      title: '', 
+      category: '', 
+      coverUrl: '', 
+      coverLink: '', 
+      coverMode: 'local', 
+      dataUrl: '', 
+      dataLink: '', 
+      dataMode: 'local', 
+      readDate: today, 
+      totalHours: 0, 
+      totalMinutes: 0, 
+      readingDays: 0, 
+      maxDailyHours: 0, 
+      maxDailyMinutes: 0 
+    });
     setIsEditing(false);
     setEditingBookId(null);
   };
 
-  // 打开增寰弹窗
   const openZengHuanModal = (index: number) => {
     setZengHuanSlotIndex(index);
     const slot = readingSlots[index];
     if (slot && typeof slot === 'object' && 'id' in slot) {
+      const isUrl = slot.imageUrl.startsWith('http');
       setZengHuanForm({
-        imageUrl: slot.imageUrl || '',
+        imageUrl: isUrl ? '' : slot.imageUrl,
+        imageLink: isUrl ? slot.imageUrl : '',
+        imageMode: isUrl ? 'url' : 'local',
         totalYears: slot.totalYears || 0,
         totalHours: slot.totalHours || 0,
         totalMinutes: slot.totalMinutes || 0,
@@ -151,9 +200,11 @@ export default function BookGrid() {
         readingDays: slot.readingDays || 0,
       });
     } else if (slot && typeof slot === 'string') {
-      // 兼容旧的数据格式
+      const isUrl = slot.startsWith('http');
       setZengHuanForm({
-        imageUrl: slot,
+        imageUrl: isUrl ? '' : slot,
+        imageLink: isUrl ? slot : '',
+        imageMode: isUrl ? 'url' : 'local',
         totalYears: 0,
         totalHours: 0,
         totalMinutes: 0,
@@ -163,6 +214,8 @@ export default function BookGrid() {
     } else {
       setZengHuanForm({
         imageUrl: '',
+        imageLink: '',
+        imageMode: 'local',
         totalYears: 0,
         totalHours: 0,
         totalMinutes: 0,
@@ -173,14 +226,14 @@ export default function BookGrid() {
     setIsZengHuanOpen(true);
   };
 
-  // 提交增寰数据
   const handleZengHuanSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!zengHuanForm.imageUrl.trim()) return;
+    const finalImageUrl = zengHuanForm.imageMode === 'local' ? zengHuanForm.imageUrl : zengHuanForm.imageLink;
+    if (!finalImageUrl.trim()) return;
     
     const newSlot: ReadingSlotObject = {
       id: `slot-${zengHuanSlotIndex}`,
-      imageUrl: zengHuanForm.imageUrl,
+      imageUrl: finalImageUrl,
       totalYears: zengHuanForm.totalYears || undefined,
       totalHours: zengHuanForm.totalHours || undefined,
       totalMinutes: zengHuanForm.totalMinutes || undefined,
@@ -190,13 +243,13 @@ export default function BookGrid() {
     
     updateReadingSlot(zengHuanSlotIndex, newSlot);
     
-    // 清除错误状态
     const newBroken = brokenSlots.filter(s => s !== zengHuanSlotIndex);
     setBrokenSlots(newBroken);
     
-    // 重置表单
     setZengHuanForm({
       imageUrl: '',
+      imageLink: '',
+      imageMode: 'local',
       totalYears: 0,
       totalHours: 0,
       totalMinutes: 0,
@@ -206,7 +259,6 @@ export default function BookGrid() {
     setIsZengHuanOpen(false);
   };
 
-  // 删除槽位
   const handleDeleteSlot = (index: number) => {
     deleteReadingSlot(index);
   };
@@ -232,13 +284,11 @@ export default function BookGrid() {
 
   return (
     <div className="space-y-6">
-      {/* 阅读汇总栏 - 10格图片上传 */}
       <div className="bg-ink/70 border border-gold/10 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-serif text-gold">🏯 慧府</h3>
         </div>
         
-        {/* 10格图片网格 */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {readingSlots.map((slot, i) => {
             const url = slot && typeof slot === 'object' ? slot.imageUrl : (slot || null);
@@ -300,7 +350,6 @@ export default function BookGrid() {
         </div>
       </div>
 
-      {/* 增寰弹窗 */}
       {isZengHuanOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-ink border border-gold/30 rounded-xl w-full max-w-md p-6">
@@ -311,47 +360,98 @@ export default function BookGrid() {
               </button>
             </div>
             <form onSubmit={handleZengHuanSubmit} className="space-y-4">
-              {/* 封面图片 */}
               <div>
                 <label className="block text-sm text-paper/70 mb-2">图片</label>
-                <div
-                  className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
-                  onClick={() => document.getElementById('zenghuan-cover-upload')?.click()}
-                >
-                  <input
-                    id="zenghuan-cover-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const base64 = await fileToBase64(file);
-                        setZengHuanForm({ ...zengHuanForm, imageUrl: base64 });
-                      }
-                    }}
-                  />
-                  {zengHuanForm.imageUrl ? (
-                    <div className="relative">
-                      <img src={zengHuanForm.imageUrl} alt="" className="w-full h-24 object-cover rounded" />
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 p-1 bg-black/50 rounded"
-                        onClick={(e) => { e.stopPropagation(); setZengHuanForm({ ...zengHuanForm, imageUrl: '' }); }}
-                      >
-                        <X size={14} className="text-paper" />
-                      </button>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setZengHuanForm({ ...zengHuanForm, imageMode: 'local' })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 ${
+                        zengHuanForm.imageMode === 'local' 
+                          ? 'bg-gold/20 text-gold border border-gold/50' 
+                          : 'bg-ink/50 text-paper/60 hover:text-paper'
+                      }`}
+                    >
+                      <Camera size={14} />
+                      本地图片
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setZengHuanForm({ ...zengHuanForm, imageMode: 'url' })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 ${
+                        zengHuanForm.imageMode === 'url' 
+                          ? 'bg-gold/20 text-gold border border-gold/50' 
+                          : 'bg-ink/50 text-paper/60 hover:text-paper'
+                      }`}
+                    >
+                      <ExternalLink size={14} />
+                      网络链接
+                    </button>
+                  </div>
+                  
+                  {zengHuanForm.imageMode === 'local' ? (
+                    <div
+                      className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
+                      onClick={() => document.getElementById('zenghuan-cover-upload')?.click()}
+                    >
+                      <input
+                        id="zenghuan-cover-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const base64 = await fileToBase64(file);
+                            setZengHuanForm({ ...zengHuanForm, imageUrl: base64 });
+                          }
+                        }}
+                      />
+                      {zengHuanForm.imageUrl ? (
+                        <div className="relative">
+                          <img src={zengHuanForm.imageUrl} alt="" className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 p-1 bg-black/50 rounded"
+                            onClick={(e) => { e.stopPropagation(); setZengHuanForm({ ...zengHuanForm, imageUrl: '' }); }}
+                          >
+                            <X size={14} className="text-paper" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-paper/40">
+                          <Upload size={24} />
+                          <span className="text-sm">点击上传图片</span>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-2 text-paper/40">
-                      <Upload size={24} />
-                      <span className="text-sm">点击上传图片</span>
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={zengHuanForm.imageLink}
+                        onChange={(e) => setZengHuanForm({ ...zengHuanForm, imageLink: e.target.value })}
+                        placeholder="输入图片URL链接"
+                        className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                      />
+                      {zengHuanForm.imageLink && (
+                        <div className="relative">
+                          <img 
+                            src={zengHuanForm.imageLink} 
+                            alt="" 
+                            className="w-full h-24 object-cover rounded" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
               
-              {/* 统计信息 */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm text-paper/70 mb-2">年份</label>
@@ -411,7 +511,11 @@ export default function BookGrid() {
                 <button type="button" onClick={() => setIsZengHuanOpen(false)} className="flex-1 btn-secondary">
                   取消
                 </button>
-                <button type="submit" disabled={!zengHuanForm.imageUrl.trim()} className="flex-1 btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
+                <button 
+                  type="submit" 
+                  disabled={!((zengHuanForm.imageMode === 'local' ? zengHuanForm.imageUrl : zengHuanForm.imageLink).trim())} 
+                  className="flex-1 btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                >
                   确定
                 </button>
               </div>
@@ -420,7 +524,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {/* 顶部：日期筛选 + 添加按钮 */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex gap-2 flex-wrap">
           <button
@@ -478,7 +581,7 @@ export default function BookGrid() {
                 <select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full bg-ink/50 border border-gold/30 rounded-lg px-4 py-2 text-paper focus:outline-none focus:border-gold"
+                  className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper focus:outline-none focus:border-gold"
                 >
                   <option value="">选择分类</option>
                   <option value="哲学">哲学</option>
@@ -608,7 +711,7 @@ export default function BookGrid() {
                     min="0"
                     value={form.readingDays}
                     onChange={(e) => setForm({ ...form, readingDays: Number(e.target.value) })}
-                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper focus:outline-none focus:border-gold"
+                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -649,7 +752,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {/* 编辑书籍弹窗 */}
       {isEditing && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-ink border border-gold/30 rounded-xl w-full max-w-md p-6">
@@ -695,76 +797,182 @@ export default function BookGrid() {
               </div>
               <div>
                 <label className="block text-sm text-paper/70 mb-2">封面图片</label>
-                <div
-                  className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
-                  onClick={() => document.getElementById('edit-cover-upload')?.click()}
-                >
-                  <input
-                    id="edit-cover-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const base64 = await fileToBase64(file);
-                        setForm({ ...form, coverUrl: base64 });
-                      }
-                    }}
-                  />
-                  {form.coverUrl ? (
-                    <div className="relative">
-                      <img src={form.coverUrl} alt="" className="w-full h-24 object-cover rounded" />
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 p-1 bg-black/50 rounded"
-                        onClick={(e) => { e.stopPropagation(); setForm({ ...form, coverUrl: '' }); }}
-                      >
-                        <X size={14} className="text-paper" />
-                      </button>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, coverMode: 'local' })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 ${
+                        form.coverMode === 'local' 
+                          ? 'bg-gold/20 text-gold border border-gold/50' 
+                          : 'bg-ink/50 text-paper/60 hover:text-paper'
+                      }`}
+                    >
+                      <Camera size={14} />
+                      本地图片
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, coverMode: 'url' })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 ${
+                        form.coverMode === 'url' 
+                          ? 'bg-gold/20 text-gold border border-gold/50' 
+                          : 'bg-ink/50 text-paper/60 hover:text-paper'
+                      }`}
+                    >
+                      <ExternalLink size={14} />
+                      网络链接
+                    </button>
+                  </div>
+                  
+                  {form.coverMode === 'local' ? (
+                    <div
+                      className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
+                      onClick={() => document.getElementById('edit-cover-upload')?.click()}
+                    >
+                      <input
+                        id="edit-cover-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const base64 = await fileToBase64(file);
+                            setForm({ ...form, coverUrl: base64 });
+                          }
+                        }}
+                      />
+                      {form.coverUrl ? (
+                        <div className="relative">
+                          <img src={form.coverUrl} alt="" className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 p-1 bg-black/50 rounded"
+                            onClick={(e) => { e.stopPropagation(); setForm({ ...form, coverUrl: '' }); }}
+                          >
+                            <X size={14} className="text-paper" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-paper/40">
+                          <Upload size={24} />
+                          <span className="text-sm">点击上传封面图片</span>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-2 text-paper/40">
-                      <Upload size={24} />
-                      <span className="text-sm">点击上传封面图片</span>
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={form.coverLink}
+                        onChange={(e) => setForm({ ...form, coverLink: e.target.value })}
+                        placeholder="输入图片URL链接"
+                        className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                      />
+                      {form.coverLink && (
+                        <div className="relative">
+                          <img 
+                            src={form.coverLink} 
+                            alt="" 
+                            className="w-full h-24 object-cover rounded" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
               <div>
                 <label className="block text-sm text-paper/70 mb-2">数据图片</label>
-                <div
-                  className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
-                  onClick={() => document.getElementById('edit-data-upload')?.click()}
-                >
-                  <input
-                    id="edit-data-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const base64 = await fileToBase64(file);
-                        setForm({ ...form, dataUrl: base64 });
-                      }
-                    }}
-                  />
-                  {form.dataUrl ? (
-                    <div className="relative">
-                      <img src={form.dataUrl} alt="" className="w-full h-24 object-cover rounded" />
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 p-1 bg-black/50 rounded"
-                        onClick={(e) => { e.stopPropagation(); setForm({ ...form, dataUrl: '' }); }}
-                      >
-                        <X size={14} className="text-paper" />
-                      </button>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, dataMode: 'local' })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 ${
+                        form.dataMode === 'local' 
+                          ? 'bg-gold/20 text-gold border border-gold/50' 
+                          : 'bg-ink/50 text-paper/60 hover:text-paper'
+                      }`}
+                    >
+                      <Camera size={14} />
+                      本地图片
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, dataMode: 'url' })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 ${
+                        form.dataMode === 'url' 
+                          ? 'bg-gold/20 text-gold border border-gold/50' 
+                          : 'bg-ink/50 text-paper/60 hover:text-paper'
+                      }`}
+                    >
+                      <ExternalLink size={14} />
+                      网络链接
+                    </button>
+                  </div>
+                  
+                  {form.dataMode === 'local' ? (
+                    <div
+                      className="w-full border-2 border-dashed border-gold/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all"
+                      onClick={() => document.getElementById('edit-data-upload')?.click()}
+                    >
+                      <input
+                        id="edit-data-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const base64 = await fileToBase64(file);
+                            setForm({ ...form, dataUrl: base64 });
+                          }
+                        }}
+                      />
+                      {form.dataUrl ? (
+                        <div className="relative">
+                          <img src={form.dataUrl} alt="" className="w-full h-24 object-cover rounded" />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 p-1 bg-black/50 rounded"
+                            onClick={(e) => { e.stopPropagation(); setForm({ ...form, dataUrl: '' }); }}
+                          >
+                            <X size={14} className="text-paper" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-paper/40">
+                          <Upload size={24} />
+                          <span className="text-sm">点击上传数据图片（可选）</span>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-2 text-paper/40">
-                      <Upload size={24} />
-                      <span className="text-sm">点击上传数据图片（可选）</span>
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={form.dataLink}
+                        onChange={(e) => setForm({ ...form, dataLink: e.target.value })}
+                        placeholder="输入数据图片URL链接（可选）"
+                        className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
+                      />
+                      {form.dataLink && (
+                        <div className="relative">
+                          <img 
+                            src={form.dataLink} 
+                            alt="" 
+                            className="w-full h-24 object-cover rounded" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -808,7 +1016,7 @@ export default function BookGrid() {
                     min="0"
                     value={form.readingDays}
                     onChange={(e) => setForm({ ...form, readingDays: Number(e.target.value) })}
-                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper focus:outline-none focus:border-gold"
+                    className="w-full bg-ink/50 border border-gold/30 rounded-lg px-3 py-2 text-paper placeholder:text-paper/30 focus:outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -843,7 +1051,11 @@ export default function BookGrid() {
                 }} className="flex-1 btn-secondary">
                   取消
                 </button>
-                <button type="submit" disabled={!form.coverUrl} className="flex-1 btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
+                <button 
+                  type="submit" 
+                  disabled={!((form.coverMode === 'local' ? form.coverUrl : form.coverLink))} 
+                  className="flex-1 btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                >
                   保存修改
                 </button>
               </div>
@@ -852,7 +1064,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {/* 10格图片预览 */}
       {selectedSlotSummary && (
         <div
           className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-start justify-center z-50 overflow-y-auto p-4"
@@ -873,7 +1084,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {/* 年度数据大图预览 */}
       {selectedSummary && (
         <div
           className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-start justify-center z-50 overflow-y-auto p-4"
@@ -894,7 +1104,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {/* 图片放大弹窗 */}
       {selectedBook && (
         <div
           className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-start justify-center z-50 overflow-y-auto p-4"
@@ -931,7 +1140,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {/* 年度数据总览 */}
       {yearSummaries.length > 0 && (
         <div>
           <div className="flex items-center gap-3 mb-3">
@@ -961,7 +1169,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {/* 按年月分组的网格 */}
       {groupedBooks.length === 0 ? (
         <div className="text-center py-20 text-paper/20">
           <p className="text-lg">暂无已读书籍</p>

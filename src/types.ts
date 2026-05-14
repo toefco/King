@@ -36,7 +36,9 @@ export interface Book {
   author: string;
   category: string;
   coverUrl: string;
+  coverLink?: string;
   dataUrl?: string;
+  dataLink?: string;
   status: 'reading' | 'completed' | 'planned';
   readDate?: string;
   thoughts?: string;
@@ -50,6 +52,7 @@ export interface Book {
 export interface ReadingSlotObject {
   id: string;
   imageUrl: string;
+  imageLink?: string;
   totalYears?: number;
   totalHours?: number;
   totalMinutes?: number;
@@ -63,6 +66,7 @@ export interface YearSummary {
   id: string;
   year: string;
   imageUrl: string;
+  imageLink?: string;
 }
 
 export interface Article {

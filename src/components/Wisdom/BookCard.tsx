@@ -123,7 +123,14 @@ export default function BookCard({ book, onImageClick, onEdit }: Props) {
         {/* 左：封面 */}
         <div
           className="w-1/2 h-full flex-shrink-0 overflow-hidden cursor-pointer relative"
-          onClick={() => onImageClick(book, 'cover')}
+          onClick={(e) => {
+            if (book.coverLink) {
+              e.stopPropagation();
+              window.open(book.coverLink, '_blank');
+            } else {
+              onImageClick(book, 'cover');
+            }
+          }}
         >
           <img
             src={book.coverUrl}
@@ -133,6 +140,15 @@ export default function BookCard({ book, onImageClick, onEdit }: Props) {
             className="w-full h-full object-cover"
             style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.06)' : 'scale(1)', objectPosition: 'top center' }}
           />
+          {book.coverLink && (
+            <div className="absolute top-2 left-2 z-20 p-1 rounded-lg bg-black/70 text-white/60 hover:text-gold transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </div>
+          )}
           {/* Bottom shadow overlay */}
           <div className="absolute bottom-0 left-0 right-0 h-1/5 z-10 pointer-events-none"
             style={{
@@ -149,17 +165,35 @@ export default function BookCard({ book, onImageClick, onEdit }: Props) {
         {/* 右：数据图 */}
         <div
           className="w-1/2 h-full flex-shrink-0 relative overflow-hidden cursor-pointer"
-          onClick={() => onImageClick(book, 'data')}
+          onClick={(e) => {
+            if (book.dataLink) {
+              e.stopPropagation();
+              window.open(book.dataLink, '_blank');
+            } else if (book.dataUrl) {
+              onImageClick(book, 'data');
+            }
+          }}
         >
           {book.dataUrl ? (
-            <img
-              src={book.dataUrl}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="w-full h-full object-cover"
-              style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.04)' : 'scale(1)', objectPosition: 'top center' }}
-            />
+            <>
+              <img
+                src={book.dataUrl}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover"
+                style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.04)' : 'scale(1)', objectPosition: 'top center' }}
+              />
+              {book.dataLink && (
+                <div className="absolute top-2 left-2 z-20 p-1 rounded-lg bg-black/70 text-white/60 hover:text-gold transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </div>
+              )}
+            </>
           ) : (
             <div
               className="w-full h-full flex flex-col items-center justify-center"

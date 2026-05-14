@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, X, Star, Trash2, Play, Upload } from 'lucide-react';
+import { Plus, X, Star, Trash2, Play, Upload, Camera, ExternalLink } from 'lucide-react';
 import { useStore } from '../../store';
 import { Hobby } from '../../types';
 
@@ -42,6 +42,8 @@ export default function HobbiesList() {
     content: '',
     milestone: false,
     imageUrl: '',
+    imageLink: '',
+    imageMode: 'local' as 'local' | 'url',
     mediaType: 'image' as 'image' | 'video',
     coverUrl: '',
   });
@@ -116,13 +118,27 @@ export default function HobbiesList() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const finalImageUrl = form.mediaType === 'image' 
+      ? (form.imageMode === 'local' ? form.imageUrl : form.imageLink)
+      : form.imageUrl;
     const hobby: Hobby = {
       id: Date.now().toString(),
       ...form,
+      imageUrl: finalImageUrl,
       date: new Date().toISOString().split('T')[0],
     };
     addHobby(hobby);
-    setForm({ type: 'music', title: '', content: '', milestone: false, imageUrl: '', mediaType: 'image', coverUrl: '' });
+    setForm({ 
+      type: 'music', 
+      title: '', 
+      content: '', 
+      milestone: false, 
+      imageUrl: '', 
+      imageLink: '', 
+      imageMode: 'local', 
+      mediaType: 'image', 
+      coverUrl: '' 
+    });
     setIsAdding(false);
   };
 
@@ -208,42 +224,98 @@ export default function HobbiesList() {
                   </div>
                   <div>
                     <label className="block text-sm text-paper/70 mb-2">
-                      {form.mediaType === 'image' ? '图片文件（可选）' : '视频URL（可选）'}
+                      {form.mediaType === 'image' ? '图片（可选）' : '视频URL（可选）'}
                     </label>
                     {form.mediaType === 'image' ? (
-                      <div
-                        className="w-full border-2 border-dashed rounded-xl p-4 text-center cursor-pointer hover:border-pink-400/50 hover:bg-pink-500/5 transition-all"
-                        style={{ borderColor: 'rgba(236,72,153,0.3)' }}
-                        onClick={() => document.getElementById('hobby-image-upload')?.click()}
-                      >
-                        <input
-                          id="hobby-image-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const base64 = await fileToBase64(file);
-                              setForm({ ...form, imageUrl: base64 });
-                            }
-                          }}
-                        />
-                        {form.imageUrl ? (
-                          <div className="relative">
-                            <img src={form.imageUrl} alt="" className="w-full h-20 object-cover rounded-lg" />
-                            <button
-                              type="button"
-                              className="absolute top-1 right-1 p-1 bg-black/50 rounded"
-                              onClick={(e) => { e.stopPropagation(); setForm({ ...form, imageUrl: '' }); }}
-                            >
-                              <X size={14} className="text-paper" />
-                            </button>
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setForm({ ...form, imageMode: 'local' })}
+                            className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 border ${
+                              form.imageMode === 'local' 
+                                ? 'bg-gold/20 text-gold border-gold/40' 
+                                : 'bg-ink/50 text-paper/60 border-gold/10 hover:text-paper'
+                            }`}
+                          >
+                            <Camera size={14} />
+                            本地图片
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setForm({ ...form, imageMode: 'url' })}
+                            className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 border ${
+                              form.imageMode === 'url' 
+                                ? 'bg-gold/20 text-gold border-gold/40' 
+                                : 'bg-ink/50 text-paper/60 border-gold/10 hover:text-paper'
+                            }`}
+                          >
+                            <ExternalLink size={14} />
+                            网络链接
+                          </button>
+                        </div>
+                        
+                        {form.imageMode === 'local' ? (
+                          <div
+                            className="w-full border-2 border-dashed rounded-xl p-4 text-center cursor-pointer hover:border-pink-400/50 hover:bg-pink-500/5 transition-all"
+                            style={{ borderColor: 'rgba(236,72,153,0.3)' }}
+                            onClick={() => document.getElementById('hobby-image-upload')?.click()}
+                          >
+                            <input
+                              id="hobby-image-upload"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const base64 = await fileToBase64(file);
+                                  setForm({ ...form, imageUrl: base64 });
+                                }
+                              }}
+                            />
+                            {form.imageUrl ? (
+                              <div className="relative">
+                                <img src={form.imageUrl} alt="" className="w-full h-20 object-cover rounded-lg" />
+                                <button
+                                  type="button"
+                                  className="absolute top-1 right-1 p-1 bg-black/50 rounded"
+                                  onClick={(e) => { e.stopPropagation(); setForm({ ...form, imageUrl: '' }); }}
+                                >
+                                  <X size={14} className="text-paper" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2 text-paper/40">
+                                <Upload size={20} />
+                                <span className="text-sm">点击上传图片</span>
+                              </div>
+                            )}
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center gap-2 text-paper/40">
-                            <Upload size={20} />
-                            <span className="text-sm">点击上传图片</span>
+                          <div className="space-y-2">
+                            <input
+                              type="url"
+                              value={form.imageLink}
+                              onChange={(e) => setForm({ ...form, imageLink: e.target.value })}
+                              className="w-full rounded-xl px-4 py-2.5 text-paper focus:outline-none"
+                              style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.2)' }}
+                              onFocus={e => (e.target.style.borderColor = 'rgba(236,72,153,0.5)')}
+                              onBlur={e => (e.target.style.borderColor = 'rgba(236,72,153,0.2)')}
+                              placeholder="https://..."
+                            />
+                            {form.imageLink && (
+                              <div className="relative rounded-lg overflow-hidden border border-gold/10">
+                                <img
+                                  src={form.imageLink}
+                                  alt=""
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="w-full h-20 object-cover rounded-lg"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

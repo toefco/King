@@ -10,7 +10,6 @@ function App() {
   useDataSync();
 
   useEffect(() => {
-    // 只在真正首次加载时执行一次，防止热更新导致重置
     if (!sessionStorage.getItem('app_initialized')) {
       const currentPath = window.location.pathname;
       if (currentPath !== '/' && currentPath !== '') {

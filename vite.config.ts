@@ -9,6 +9,18 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
+          'vendor-utils': ['recharts', 'xlsx', 'zustand'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
   server: {
     proxy: {
       '/api': {
@@ -18,7 +30,7 @@ export default defineConfig({
     },
     watch: {
       ignored: [
-        '**/src/data/staticData.ts', // 忽略 staticData.ts 变化，防止触发热更新
+        '**/src/data/staticData.ts',
       ],
     },
   },
