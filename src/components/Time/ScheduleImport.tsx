@@ -45,7 +45,7 @@ function getPeriodKey(d: Date, mode: ViewMode): string {
   return String(d.getFullYear());
 }
 
-export default function ScheduleImport() {
+export default function TimeAllocation() {
   const scheduleRecords = useStore((state) => state.scheduleRecords);
   const setScheduleRecords = useStore((state) => state.setScheduleRecords);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -370,7 +370,7 @@ export default function ScheduleImport() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <BarChart2 size={18} style={{ color: '#34d399' }} />
-          <h3 className="text-lg font-serif" style={{ color: '#6ee7b7' }}>作息记录</h3>
+          <h3 className="text-lg font-serif" style={{ color: '#6ee7b7' }}>时间分配</h3>
           {scheduleRecords.length > 0 && (
             <span className="text-xs text-paper/30 ml-1">{scheduleRecords.length} 条</span>
           )}
@@ -407,7 +407,7 @@ export default function ScheduleImport() {
           onMouseLeave={e => ((e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(16,185,129,0.12)')}
         >
           <Upload size={28} className="text-paper/20" />
-          <p className="text-sm text-paper/30">点击上传作息记录 .xlsx</p>
+          <p className="text-sm text-paper/30">点击上传时间分配记录 .xlsx</p>
           <p className="text-xs text-paper/20">列：开始时间 / 持续时间 / 事件类别</p>
         </div>
       ) : (

@@ -1,4 +1,4 @@
-import { ScheduleImport, HappinessImport } from '../components/Time';
+import { TimeAllocation, HappinessEvent } from '../components/Time';
 import { BackButton } from '../components/Layout';
 
 export default function TimePage() {
@@ -11,8 +11,8 @@ export default function TimePage() {
       <BackButton />
       <main className="p-6 lg:p-8 relative z-10">
         <div className="max-w-6xl mx-auto space-y-6">
-          <ScheduleImport />
-          <HappinessImport />
+          <TimeAllocation />
+          <HappinessEvent />
         </div>
       </main>
     </div>

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Plus, X, Image, Trash2, Upload, Edit2, ExternalLink, Camera } from 'lucide-react';
 import { useStore } from '../../store';
-import { Book, YearSummary, ReadingSlotObject } from '../../types';
+import { Book, ReadingSlotObject } from '../../types';
 import BookCard from './BookCard';
 
 function fileToBase64(file: File): Promise<string> {
@@ -18,9 +18,7 @@ function fileToBase64(file: File): Promise<string> {
 
 export default function BookGrid() {
   const books = useStore((state) => state.books);
-  const yearSummaries = useStore((state) => state.yearSummaries);
   const addBook = useStore((state) => state.addBook);
-  const deleteYearSummary = useStore((state) => state.deleteYearSummary);
   const updateBookThoughts = useStore((state) => state.updateBookThoughts);
   const updateBook = useStore((state) => state.updateBook);
   const readingSlots = useStore((state) => state.readingSlots);
@@ -64,8 +62,7 @@ export default function BookGrid() {
     totalBooks: 0,
     readingDays: 0,
   });
-  const [selectedSummary, setSelectedSummary] = useState<YearSummary | null>(null);
-  const [selectedSlotSummary, setSelectedSlotSummary] = useState<{year: string; imageUrl: string} | null>(null);
+  const [selectedSlotSummary, setSelectedSlotSummary] = useState<{ year: string; imageUrl: string } | null>(null);
 
   const [selectedMonth, setSelectedMonth] = useState('all');
 
@@ -1084,26 +1081,6 @@ export default function BookGrid() {
         </div>
       )}
 
-      {selectedSummary && (
-        <div
-          className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-start justify-center z-50 overflow-y-auto p-4"
-          onClick={() => setSelectedSummary(null)}
-        >
-          <div className="relative w-full max-w-2xl my-8" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setSelectedSummary(null)}
-              className="fixed top-4 right-4 z-50 p-2 rounded-full bg-ink/80 text-paper/70 hover:text-paper hover:bg-ink transition-colors"
-            >
-              <X size={24} />
-            </button>
-            <img src={selectedSummary.imageUrl} alt="" loading="lazy" decoding="async" className="w-full rounded-xl" />
-            <div className="absolute top-4 left-4 bg-ink/80 px-3 py-1.5 rounded-lg text-sm text-gold">
-              {selectedSummary.year}年 数据总结
-            </div>
-          </div>
-        </div>
-      )}
-
       {selectedBook && (
         <div
           className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-start justify-center z-50 overflow-y-auto p-4"
@@ -1140,34 +1117,7 @@ export default function BookGrid() {
         </div>
       )}
 
-      {yearSummaries.length > 0 && (
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-px flex-1 bg-gold/20" />
-            <span className="text-sm text-gold whitespace-nowrap flex items-center gap-2">
-              <Image size={14} />
-              年度数据总览
-            </span>
-            <div className="h-px flex-1 bg-gold/20" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {yearSummaries.map((summary) => (
-              <div key={summary.id} className="group relative rounded-2xl overflow-hidden border border-gold/10 hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedSummary(summary)}>
-                <button
-                  onClick={(e) => { e.stopPropagation(); deleteYearSummary(summary.id); }}
-                  className="absolute top-2 right-2 z-10 p-1.5 rounded bg-ink/80 text-paper/50 hover:text-cinnabar opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                >
-                  <Trash2 size={14} />
-                </button>
-                <img src={summary.imageUrl} alt="" loading="lazy" decoding="async" className="w-full aspect-[1/1] object-cover" />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-ink/90 to-transparent p-3">
-                  <span className="text-sm text-gold font-serif">{summary.year}年</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {groupedBooks.length === 0 ? (
         <div className="text-center py-20 text-paper/20">

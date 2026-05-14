@@ -972,6 +972,8 @@ export function analyzeGlobalPortrait(params: {
   allHappiness: HappinessRecord[];
   periodTraits: Trait[];
   allTraits: Trait[];
+  periodReadingSlots: (ReadingSlotObject | string)[];
+  allReadingSlots: (ReadingSlotObject | string)[];
   periodLabel: string;
 }): GlobalPortraitResult {
   const {
@@ -983,6 +985,7 @@ export function analyzeGlobalPortrait(params: {
     periodSchedule, allSchedule,
     periodHappiness, allHappiness,
     periodTraits, allTraits,
+    periodReadingSlots, allReadingSlots,
     periodLabel,
   } = params;
 
@@ -999,6 +1002,38 @@ export function analyzeGlobalPortrait(params: {
   const allSkillsWithCover = allSkills.filter(s => s.coverUrl && s.coverUrl.trim().length > 0);
   const allHobbiesWithImg = allHobbies.filter(h => h.imageUrl && h.imageUrl.trim().length > 0);
 
+  // 统计慧府（增寰）数据
+  const extractSlotData = (slot: ReadingSlotObject | string): { image?: boolean; years?: number; books?: number; hours?: number; minutes?: number; days?: number } => {
+    if (typeof slot === 'string') {
+      return { image: slot.trim().length > 0 };
+    }
+    return {
+      image: slot.imageUrl && slot.imageUrl.trim().length > 0,
+      years: slot.totalYears,
+      books: slot.totalBooks,
+      hours: slot.totalHours,
+      minutes: slot.totalMinutes,
+      days: slot.readingDays
+    };
+  };
+  const periodSlotData = periodReadingSlots.map(extractSlotData);
+  const allSlotData = allReadingSlots.map(extractSlotData);
+  
+  const periodSlotsWithImage = periodSlotData.filter(s => s.image).length;
+  const allSlotsWithImage = allSlotData.filter(s => s.image).length;
+  
+  const periodTotalBooks = periodSlotData.reduce((sum, s) => sum + (s.books || 0), 0);
+  const allTotalBooks = allSlotData.reduce((sum, s) => sum + (s.books || 0), 0);
+  
+  const periodTotalHours = periodSlotData.reduce((sum, s) => sum + (s.hours || 0) + (s.minutes || 0) / 60, 0);
+  const allTotalHours = allSlotData.reduce((sum, s) => sum + (s.hours || 0) + (s.minutes || 0) / 60, 0);
+  
+  const periodTotalDays = periodSlotData.reduce((sum, s) => sum + (s.days || 0), 0);
+  const allTotalDays = allSlotData.reduce((sum, s) => sum + (s.days || 0), 0);
+  
+  const periodTotalYears = periodSlotData.reduce((sum, s) => sum + (s.years || 0), 0);
+  const allTotalYears = allSlotData.reduce((sum, s) => sum + (s.years || 0), 0);
+
   // ── 板块一：各系统存档数量总览 ────────────────────────────────────────────
   const rawList: AnalysisBlock[] = [
     { label: '分析时段', value: periodLabel },
@@ -1011,9 +1046,12 @@ export function analyzeGlobalPortrait(params: {
     { label: '技艺有视频', value: periodSkillsWithVideo.length > 0 ? `${periodSkillsWithVideo.length} 件` : '—' },
     { label: '爱好留存', value: periodHobbies.length > 0 ? `${periodHobbies.length} 条` : '—' },
     { label: '爱好有图', value: periodHobbiesWithImg.length > 0 ? `${periodHobbiesWithImg.length} 条` : '—' },
+    { label: '慧府有图', value: periodSlotsWithImage > 0 ? `${periodSlotsWithImage} 张` : '—' },
+    { label: '慧府书籍', value: periodTotalBooks > 0 ? `${periodTotalBooks} 本` : '—' },
+    { label: '慧府时长', value: periodTotalHours > 0 ? `${periodTotalHours.toFixed(1)} 小时` : '—' },
     { label: '关键事件', value: periodHappiness.length > 0 ? `${periodHappiness.length} 条` : '—' },
     { label: '特质记录', value: periodTraits.length > 0 ? `${periodTraits.length} 条` : '—' },
-    { label: '全历史有图', value: `${allBooksWithCover.length + allSkillsWithCover.length + allHobbiesWithImg.length} 张` },
+    { label: '全历史有图', value: `${allBooksWithCover.length + allSkillsWithCover.length + allHobbiesWithImg.length + allSlotsWithImage} 张` },
   ];
 
   // ── 板块二：心性 ──────────────────────────────────────────────────────────
@@ -1131,6 +1169,11 @@ export function analyzeGlobalPortrait(params: {
       lines.push(`作息记录：历史累计${sDays.length}天记录`);
     }
     if (allHappiness.length > 0)      lines.push(`关键事件：历史累计${allHappiness.length}条留存`);
+    // 慧府数据
+    if (allTotalYears > 0)        lines.push(`慧府记录：阅读历史跨度约${allTotalYears}年`);
+    if (allTotalBooks > 0)        lines.push(`慧府书籍：记录阅读${allTotalBooks}本书籍`);
+    if (allTotalHours > 0)        lines.push(`慧府时长：累计阅读${allTotalHours.toFixed(1)}小时`);
+    if (allTotalDays > 0)         lines.push(`慧府天数：有效阅读${allTotalDays}天`);
     persistentHabits = lines.length > 0 ? lines.join('\n') : '全历史无足够记录判断坚持习惯。';
   }
 

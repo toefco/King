@@ -1,4 +1,4 @@
-import { ArticleList, TraitPanel } from '../components/Spirit';
+import { CognitionList, TraitPanel } from '../components/Spirit';
 import { BackButton } from '../components/Layout';
 
 export default function SpiritPage() {
@@ -12,7 +12,7 @@ export default function SpiritPage() {
       <main className="p-6 lg:p-8 relative z-10">
         <div className="max-w-4xl mx-auto">
           <TraitPanel />
-          <ArticleList />
+          <CognitionList />
         </div>
       </main>
     </div>

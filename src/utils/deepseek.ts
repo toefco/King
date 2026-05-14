@@ -321,7 +321,30 @@ export async function formatUserDataForAI(): Promise<FormattedData> {
   if (state.readingSlots && Array.isArray(state.readingSlots)) {
     const activeSlots = state.readingSlots.filter(url => url !== null);
     if (activeSlots.length > 0) {
-      dataText += '- 慧府阅读汇总: 共' + activeSlots.length + '张图片存档\n';
+      dataText += '- 慧府阅读汇总: 共' + activeSlots.length + '个存档槽位\n';
+      
+      // 详细提取每个槽位的结构化数据
+      state.readingSlots.forEach((slot, index) => {
+        if (slot === null) return;
+        
+        if (typeof slot === 'object') {
+          // 结构化数据对象
+          dataText += '  └─ 槽位' + (index + 1);
+          if (slot.totalYears) dataText += ' | 阅读跨度: ' + slot.totalYears + '年';
+          if (slot.totalBooks) dataText += ' | 读过本数: ' + slot.totalBooks + '本';
+          if (slot.totalHours !== undefined || slot.totalMinutes !== undefined) {
+            const hours = slot.totalHours || 0;
+            const minutes = slot.totalMinutes || 0;
+            dataText += ' | 阅读总计: ' + hours + '小时' + (minutes > 0 ? minutes + '分' : '');
+          }
+          if (slot.readingDays) dataText += ' | 阅读天数: ' + slot.readingDays + '天';
+          if (slot.imageUrl) dataText += ' | 有存档图片';
+          dataText += '\n';
+        } else if (typeof slot === 'string') {
+          // 纯图片数据
+          dataText += '  └─ 槽位' + (index + 1) + ': 仅图片存档\n';
+        }
+      });
     }
   }
   dataText += '\n';

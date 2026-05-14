@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TestChart, WorkoutList, AddWorkoutModal, TestList } from '../components/Fitness';
+import { WorkoutList, AddWorkoutModal, TestList } from '../components/Fitness';
 import { BackButton } from '../components/Layout';
 import { Workout } from '../types';
 
@@ -32,11 +32,8 @@ export default function FitnessPage() {
       <main className="p-6 lg:p-8 relative z-10">
         <div className="max-w-6xl mx-auto">
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="mb-6">
             <TestList />
-            <div className="card">
-              <TestChart />
-            </div>
           </div>
 
           <div className="flex justify-end mb-4">

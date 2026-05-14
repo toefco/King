@@ -41,7 +41,6 @@ export default function SkillGrid() {
     const skill: Skill = {
       id: Date.now().toString(),
       ...form,
-      level: 'beginner',
       date: form.date || new Date().toISOString().split('T')[0],
     };
     addSkill(skill);

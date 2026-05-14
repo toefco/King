@@ -83,7 +83,7 @@ export interface Skill {
   title: string;
   videoUrl: string;
   coverUrl: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
+  level?: 'beginner' | 'intermediate' | 'advanced';
   description: string;
   date?: string;  // YYYY-MM-DD 成品归档日期（可选，历史记录无此字段）
 }

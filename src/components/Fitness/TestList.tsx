@@ -4,8 +4,8 @@ import { useStore } from '../../store';
 import { FitnessTest } from '../../types';
 
 const testTypes = [
-  { value: 'balance', label: '平衡力：闭眼左腿/右腿站立', unit: '秒' },
-  { value: 'flexibility', label: '柔韧性：体前屈/背后交叉', unit: '厘米' },
+  { value: 'flexibility', label: '柔韧性：坐姿体前屈', unit: '厘米' },
+  { value: 'balance', label: '平衡力：单腿站立', unit: '秒' },
   { value: 'core', label: '核心力：平板支撑', unit: '秒' },
   { value: 'cardio', label: '心肺有氧：爬楼机8级', unit: '分钟' },
   { value: 'breathing', label: '吐纳：每分钟呼吸频率', unit: '次' },
@@ -33,11 +33,8 @@ export default function TestList() {
       value: form.value,
       unit: info.unit,
     };
-    if (form.type === 'flexibility' || form.type === 'balance') {
-      test.value2 = form.value2;
-    }
     addFitnessTest(test);
-    setForm({ type: 'balance', value: 0, value2: 0, date: new Date().toISOString().split('T')[0] });
+    setForm({ type: 'flexibility', value: 0, value2: 0, date: new Date().toISOString().split('T')[0] });
     setIsAdding(false);
   };
 
@@ -82,106 +79,49 @@ export default function TestList() {
               onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
             />
           </div>
-          {form.type === 'flexibility' || form.type === 'balance' ? (
-            <div className="grid grid-cols-2 gap-3">
-              {form.type === 'balance' ? (
-                <>
-                  <div>
-                    <label className="block text-xs text-paper/50 mb-1">左腿</label>
-                    <input
-                      type="number"
-                      value={form.value}
-                      onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
-                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
-                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
-                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
-                      placeholder="左腿 秒"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-paper/50 mb-1">右腿</label>
-                    <input
-                      type="number"
-                      value={form.value2}
-                      onChange={(e) => setForm({ ...form, value2: Number(e.target.value) })}
-                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
-                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
-                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
-                      placeholder="右腿 秒"
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-xs text-paper/50 mb-1">体前屈</label>
-                    <input
-                      type="number"
-                      value={form.value}
-                      onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
-                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
-                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
-                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
-                      placeholder="体前屈 cm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-paper/50 mb-1">背后交叉</label>
-                    <input
-                      type="number"
-                      value={form.value2}
-                      onChange={(e) => setForm({ ...form, value2: Number(e.target.value) })}
-                      className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
-                      style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
-                      onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
-                      placeholder="背后交叉 cm"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <input
-              type="number"
-              value={form.value}
-              onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
-              className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
-              style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
-              onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
-              onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
-              placeholder="数值"
-            />
-          )}
+          <input
+            type="number"
+            value={form.value}
+            onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
+            className="w-full rounded-lg px-3 py-2 text-paper text-sm focus:outline-none"
+            style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(239,68,68,0.2)' }}
+            onFocus={e => (e.target.style.borderColor = 'rgba(239,68,68,0.5)')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(239,68,68,0.2)')}
+            placeholder="数值"
+          />
           <button type="submit" className="w-full btn-primary text-sm">保存</button>
         </form>
       )}
 
-      {/* 4 项基础属性最新值 */}
+      {/* 数据展示 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         {testTypes.map((type) => {
           const latest = fitnessTests.filter((t) => t.type === type.value).slice(-1)[0];
-          const isBalanceOrFlex = type.value === 'flexibility' || type.value === 'balance';
           return (
-            <div key={type.value} className="p-4 rounded-xl" style={{
+            <div key={type.value} className="p-4 rounded-xl group" style={{
               background: 'rgba(239,68,68,0.05)',
               border: '1px solid rgba(239,68,68,0.12)',
               boxShadow: 'inset 0 1px 0 rgba(239,68,68,0.06)'
             }}>
-              <div className="text-sm text-paper/60 mb-1">{type.label}</div>
-              <div className="text-2xl font-serif" style={{ color: '#ef4444' }}>
-                {latest
-                  ? isBalanceOrFlex && latest.value2 != null
-                    ? `${latest.value} / ${latest.value2}`
-                    : latest.value
-                  : '--'}
-                <span className="text-sm text-paper/50 ml-1">{latest ? latest.unit : type.unit}</span>
-              </div>
-              <div className="text-xs text-paper/40 mt-1">
-                {latest ? latest.date : '暂无数据'}
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="text-sm text-paper/60 mb-1">{type.label}</div>
+                  <div className="text-xl font-serif" style={{ color: '#ef4444' }}>
+                    {latest ? latest.value : '--'}
+                    <span className="text-sm text-paper/50 ml-1">{latest ? latest.unit : type.unit}</span>
+                  </div>
+                  <div className="text-xs text-paper/40 mt-1">
+                    {latest ? latest.date : '暂无数据'}
+                  </div>
+                </div>
+                {latest && (
+                  <button
+                    onClick={() => deleteFitnessTest(latest.id)}
+                    className="text-paper/20 hover:text-cinnabar transition-colors opacity-0 group-hover:opacity-100 p-1"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -206,10 +146,8 @@ export default function TestList() {
                   }}>
                     <span className="text-paper/60">{info?.label || test.type}</span>
                     <div className="flex items-center gap-3">
-                      <span className="font-serif" style={{ color: '#ef4444' }}>
-                        {isBalanceOrFlex && test.value2 != null
-                          ? `${test.value} / ${test.value2}${test.unit}`
-                          : `${test.value}${test.unit}`}
+                      <span className="font-serif text-sm" style={{ color: '#ef4444' }}>
+                        {test.value}{test.unit}
                       </span>
                       <span className="text-xs text-paper/30">{test.date}</span>
                       <button

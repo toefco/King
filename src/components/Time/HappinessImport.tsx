@@ -144,7 +144,7 @@ function getPeriodKey(d: Date, mode: ViewMode): string {
   return String(d.getFullYear());
 }
 
-export default function HappinessImport() {
+export default function HappinessEvent() {
   const happinessRecords = useStore((s) => s.happinessRecords);
   const setHappinessRecords = useStore((s) => s.setHappinessRecords);
   const fileRef = useRef<HTMLInputElement>(null);

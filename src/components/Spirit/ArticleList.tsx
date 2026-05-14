@@ -4,7 +4,7 @@ import { useStore } from '../../store';
 import { Article } from '../../types';
 import ArticleCard from './ArticleCard';
 
-export default function ArticleList() {
+export default function CognitionList() {
   const articles = useStore((state) => state.articles);
   const addArticle = useStore((state) => state.addArticle);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -83,7 +83,7 @@ export default function ArticleList() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-ink border border-gold/30 rounded-xl w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-serif text-gold">撰写文章</h3>
+              <h3 className="text-xl font-serif text-gold">记录意识海</h3>
               <button onClick={() => setIsAdding(false)} className="text-paper/60 hover:text-paper">
                 <X size={20} />
               </button>
