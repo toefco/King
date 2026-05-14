@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>导出 localStorage 数据</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background: #0a0a14; color: #e0e0e0; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #c9a96e; color: #000; border: none; border-radius: 8px; margin: 5px; }
+    button:hover { background: #d4b87a; }
+    button:disabled { background: #444; cursor: not-allowed; }
+    pre { background: #1a1a2e; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; max-height: 300px; overflow-y: auto; }
+    .success { color: #4ade80; font-weight: bold; }
+    .error { color: #f87171; font-weight: bold; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 20px 0; }
+    .stat-item { background: #1a1a2e; padding: 10px; border-radius: 8px; text-align: center; }
+    .stat-label { font-size: 12px; color: #888; }
+    .stat-value { font-size: 18px; font-weight: bold; color: #c9a96e; }
+  </style>
+</head>
+<body>
+  <h1>📤 导出 localStorage 数据</h1>
+  
+  <div id="localStats" class="stats">
+    <div class="stat-item"><div class="stat-label">localStorage 数据</div><div class="stat-value" id="lsSize">-</div></div>
+    <div class="stat-item"><div class="stat-label">书籍</div><div class="stat-value" id="lsBooks">-</div></div>
+    <div class="stat-item"><div class="stat-label">幸福事件</div><div class="stat-value" id="lsHappiness">-</div></div>
+    <div class="stat-item"><div class="stat-label">训练记录</div><div class="stat-value" id="lsWorkouts">-</div></div>
+  </div>
+
+  <div id="staticStats" class="stats" style="display: none;">
+    <div class="stat-item"><div class="stat-label">staticData.ts</div><div class="stat-value" id="staticSize">-</div></div>
+    <div class="stat-item"><div class="stat-label">书籍</div><div class="stat-value" id="staticBooks">-</div></div>
+    <div class="stat-item"><div class="stat-label">幸福事件</div><div class="stat-value" id="staticHappiness">-</div></div>
+    <div class="stat-item"><div class="stat-label">训练记录</div><div class="stat-value" id="staticWorkouts">-</div></div>
+  </div>
+
+  <div style="margin: 20px 0;">
+    <button onclick="checkData()">🔍 检查数据</button>
+    <button onclick="exportAndSave()" id="exportBtn" disabled>📥 导出并保存到 staticData.ts</button>
+    <button onclick="gitPush()" id="pushBtn" disabled>🚀 Git Push</button>
+  </div>
+
+  <div id="result"></div>
+  <pre id="output"></pre>
+
+  <script>
+    const SERVER_URL = 'http://localhost:8765';
+
+    async function checkData() {
+      const storageKey = 'talent-showcase-local-data';
+      const data = localStorage.getItem(storageKey);
+      
+      if (!data) {
+        document.getElementById('result').innerHTML = '<p class="error">❌ localStorage 中没有数据</p>';
+        return;
+      }
+      
+      const parsedData = JSON.parse(data);
+      
+      // 更新 localStorage 统计
+      document.getElementById('lsSize').textContent = (data.length / 1024).toFixed(1) + ' KB';
+      document.getElementById('lsBooks').textContent = (parsedData.books?.length || 0) + ' 本';
+      document.getElementById('lsHappiness').textContent = (parsedData.happiness?.length || 0) + ' 条';
+      document.getElementById('lsWorkouts').textContent = (parsedData.workouts?.length || 0) + ' 条';
+      
+      // 获取 staticData.ts 统计
+      try {
+        const res = await fetch(`${SERVER_URL}/api/data-stats`);
+        const result = await res.json();
+        
+        if (result.success) {
+          document.getElementById('staticStats').style.display = 'grid';
+          document.getElementById('staticSize').textContent = '已存在';
+          document.getElementById('staticBooks').textContent = result.stats.books + ' 本';
+          document.getElementById('staticHappiness').textContent = result.stats.happiness + ' 条';
+          document.getElementById('staticWorkouts').textContent = result.stats.workouts + ' 条';
+        }
+      } catch (e) {
+        console.log('无法获取 staticData.ts 统计');
+      }
+      
+      document.getElementById('exportBtn').disabled = false;
+      document.getElementById('result').innerHTML = '<p class="success">✅ localStorage 数据已就绪</p>';
+      document.getElementById('output').textContent = JSON.stringify(parsedData, (key, value) => {
+        if (key === 'coverUrl' || key === 'dataUrl' || key === 'imageUrl') {
+          return value ? '[图片数据...]' : value;
+        }
+        return value;
+      }, 2).slice(0, 5000) + '\n...';
+    }
+
+    async function exportAndSave() {
+      const storageKey = 'talent-showcase-local-data';
+      const data = localStorage.getItem(storageKey);
+      
+      if (!data) {
+        document.getElementById('result').innerHTML = '<p class="error">❌ 没有数据可导出</p>';
+        return;
+      }
+      
+      const parsedData = JSON.parse(data);
+      const newContent = `// 完整的静态数据 - 自动导出于 ${new Date().toISOString()}
+export const staticData = ${JSON.stringify(parsedData, null, 2)};`;
+      
+      try {
+        const res = await fetch(`${SERVER_URL}/api/save-static-data`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: newContent })
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          document.getElementById('result').innerHTML = '<p class="success">✅ 数据已保存到 staticData.ts！</p>';
+          document.getElementById('pushBtn').disabled = false;
+          await checkData(); // 刷新统计
+        } else {
+          document.getElementById('result').innerHTML = `<p class="error">❌ 保存失败: ${result.message}</p>`;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<p class="error">❌ 保存失败: ${error.message}</p>`;
+      }
+    }
+
+    async function gitPush() {
+      try {
+        const res = await fetch(`${SERVER_URL}/api/git-push`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          document.getElementById('result').innerHTML = `<p class="success">✅ Git Push 成功！</p><pre>${result.stdout}</pre>`;
+        } else {
+          document.getElementById('result').innerHTML = `<p class="error">❌ Git Push 失败: ${result.message}</p>`;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<p class="error">❌ Git Push 失败: ${error.message}</p>`;
+      }
+    }
+
+    // 页面加载时检查
+    checkData();
+  </script>
+</body>
+</html>

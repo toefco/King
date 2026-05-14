@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>粘贴 localStorage 数据</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background: #0a0a14; color: #e0e0e0; }
+    textarea { width: 100%; height: 300px; padding: 10px; font-family: monospace; font-size: 12px; background: #1a1a2e; color: #e0e0e0; border: 1px solid #333; border-radius: 8px; }
+    button { padding: 12px 30px; font-size: 16px; cursor: pointer; background: #c9a96e; color: #000; border: none; border-radius: 8px; margin: 10px 5px; }
+    button:hover { background: #d4b87a; }
+    button:disabled { background: #444; cursor: not-allowed; }
+    .success { color: #4ade80; font-weight: bold; }
+    .error { color: #f87171; font-weight: bold; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+    .stat-item { background: #1a1a2e; padding: 15px; border-radius: 8px; text-align: center; }
+    .stat-label { font-size: 12px; color: #888; }
+    .stat-value { font-size: 20px; font-weight: bold; color: #c9a96e; }
+  </style>
+</head>
+<body>
+  <h1>📋 粘贴 localStorage 数据</h1>
+  
+  <p>请将 localStorage 数据粘贴到下方文本框，然后点击保存按钮：</p>
+  
+  <textarea id="dataInput" placeholder="在这里粘贴 localStorage 数据..."></textarea>
+  
+  <div style="margin-top: 20px;">
+    <button onclick="validateAndSave()" id="saveBtn">💾 保存到 staticData.ts</button>
+    <button onclick="gitPush()" id="pushBtn" disabled>🚀 Git Push</button>
+  </div>
+
+  <div id="result"></div>
+  
+  <div id="statsDiv" class="stats" style="display: none;">
+    <div class="stat-item"><div class="stat-label">书籍</div><div class="stat-value" id="statBooks">-</div></div>
+    <div class="stat-item"><div class="stat-label">幸福事件</div><div class="stat-value" id="statHappiness">-</div></div>
+    <div class="stat-item"><div class="stat-label">训练记录</div><div class="stat-value" id="statWorkouts">-</div></div>
+    <div class="stat-item"><div class="stat-label">文章</div><div class="stat-value" id="statArticles">-</div></div>
+    <div class="stat-item"><div class="stat-label">技能</div><div class="stat-value" id="statSkills">-</div></div>
+    <div class="stat-item"><div class="stat-label">爱好</div><div class="stat-value" id="statHobbies">-</div></div>
+  </div>
+
+  <script>
+    const SERVER_URL = 'http://localhost:8765';
+
+    async function validateAndSave() {
+      const data = document.getElementById('dataInput').value.trim();
+      
+      if (!data) {
+        document.getElementById('result').innerHTML = '<p class="error">❌ 请先粘贴数据</p>';
+        return;
+      }
+      
+      let parsedData;
+      try {
+        parsedData = JSON.parse(data);
+      } catch (e) {
+        document.getElementById('result').innerHTML = '<p class="error">❌ 无效的 JSON 数据</p>';
+        return;
+      }
+      
+      // 显示统计
+      document.getElementById('statsDiv').style.display = 'grid';
+      document.getElementById('statBooks').textContent = (parsedData.books?.length || 0) + ' 本';
+      document.getElementById('statHappiness').textContent = (parsedData.happiness?.length || 0) + ' 条';
+      document.getElementById('statWorkouts').textContent = (parsedData.workouts?.length || 0) + ' 条';
+      document.getElementById('statArticles').textContent = (parsedData.articles?.length || 0) + ' 篇';
+      document.getElementById('statSkills').textContent = (parsedData.skills?.length || 0) + ' 项';
+      document.getElementById('statHobbies').textContent = (parsedData.hobbies?.length || 0) + ' 个';
+      
+      // 保存到 staticData.ts
+      const newContent = `// 完整的静态数据 - 自动导出于 ${new Date().toISOString()}
+export const staticData = ${JSON.stringify(parsedData, null, 2)};`;
+      
+      try {
+        const res = await fetch(`${SERVER_URL}/api/save-static-data`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: newContent })
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          document.getElementById('result').innerHTML = '<p class="success">✅ 数据已保存到 staticData.ts！</p>';
+          document.getElementById('saveBtn').disabled = true;
+          document.getElementById('pushBtn').disabled = false;
+        } else {
+          document.getElementById('result').innerHTML = `<p class="error">❌ 保存失败: ${result.message}</p>`;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<p class="error">❌ 保存失败: ${error.message}</p>`;
+      }
+    }
+
+    async function gitPush() {
+      try {
+        const res = await fetch(`${SERVER_URL}/api/git-push`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          document.getElementById('result').innerHTML = `<p class="success">✅ Git Push 成功！</p><pre>${result.stdout}</pre>`;
+          document.getElementById('pushBtn').disabled = true;
+        } else {
+          document.getElementById('result').innerHTML = `<p class="error">❌ Git Push 失败: ${result.message}</p>`;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<p class="error">❌ Git Push 失败: ${error.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

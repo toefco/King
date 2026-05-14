@@ -10,11 +10,17 @@ function App() {
   useDataSync();
 
   useEffect(() => {
-    const currentPath = window.location.pathname;
-    if (currentPath !== '/' && currentPath !== '') {
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
+    // 只在真正首次加载时执行一次，防止热更新导致重置
+    if (!sessionStorage.getItem('app_initialized')) {
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/' && currentPath !== '') {
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
+      } else {
+        setIsReady(true);
+      }
+      sessionStorage.setItem('app_initialized', 'true');
     } else {
       setIsReady(true);
     }

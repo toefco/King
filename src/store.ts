@@ -27,6 +27,30 @@ function saveToStorage(data: any) {
   }
 }
 
+// 保存数据到 staticData.ts 文件（通过本地 API）
+async function saveToStaticFile(data: any): Promise<boolean> {
+  try {
+    const content = `// 完整的静态数据 - 自动保存于 ${new Date().toISOString()}
+export const staticData = ${JSON.stringify(data, null, 2)};`;
+    
+    const response = await fetch('/api/save-static-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content })
+    });
+    
+    const result = await response.json();
+    if (result.success) {
+      console.log('✅ 数据已自动保存到 staticData.ts');
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('保存到 staticData.ts 失败（本地服务未启动？）', e);
+    return false;
+  }
+}
+
 // 主人模式检测
 export function isOwnerMode(): boolean {
   const hostname = window.location.hostname;
@@ -110,6 +134,7 @@ interface AppState {
   clearAllData: () => void;
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => boolean;
+  saveToStaticData: () => Promise<boolean>;
 }
 
 // 创建 store
@@ -449,6 +474,29 @@ export const useStore = create<AppState>()((set, get) => {
         return true;
       }
       return false;
+    },
+    
+    // 保存到 staticData.ts 文件
+    saveToStaticData: async () => {
+      const state = get();
+      const data = {
+        talents: state.talents,
+        fitnessTests: state.fitnessTests,
+        workouts: state.workouts,
+        books: state.books,
+        yearSummaries: state.yearSummaries,
+        articles: state.articles,
+        skills: state.skills,
+        hobbies: state.hobbies,
+        schedules: state.schedules,
+        happiness: state.happiness,
+        scheduleRecords: state.scheduleRecords,
+        happinessRecords: state.happinessRecords,
+        traits: state.traits,
+        readingSlots: state.readingSlots,
+        brokenSlots: state.brokenSlots,
+      };
+      return await saveToStaticFile(data);
     },
   };
 });
