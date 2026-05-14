@@ -7,6 +7,8 @@ const SYNC_INTERVAL = 30000;
 export function useDataSync() {
   const ownerMode = useStore((state) => state.ownerMode);
   const exportData = useStore((state) => state.exportData);
+  const importData = useStore((state) => state.importData);
+  const loadFromBackend = useStore((state) => state.loadFromBackend);
 
   const syncToServer = useCallback(async () => {
     if (!ownerMode) return;
@@ -38,13 +40,19 @@ export function useDataSync() {
       const response = await fetchUserData(userId);
       if (response.success && response.data) {
         console.log('[从服务器加载数据]');
-        return response.data;
+        // 注意：服务器返回的数据格式需要处理
+        // 如果是 sync 接口返回的数据，可能包含 .data 字段
+        const serverData = response.data.data || response.data;
+        if (serverData && serverData.version) {
+          importData(serverData);
+        }
+        return serverData;
       }
     } catch (e) {
       console.error('[从服务器加载失败]', e);
     }
     return null;
-  }, [ownerMode]);
+  }, [ownerMode, importData]);
 
   const forceSave = useCallback(async () => {
     if (!ownerMode) return;
@@ -67,11 +75,12 @@ export function useDataSync() {
   useEffect(() => {
     if (!ownerMode) return;
 
+    loadFromBackend();
     syncFromServer();
     const interval = setInterval(syncToServer, SYNC_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [ownerMode, syncToServer, syncFromServer]);
+  }, [ownerMode, syncToServer, syncFromServer, loadFromBackend]);
 
   return { syncToServer, syncFromServer, forceSave };
 }

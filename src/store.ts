@@ -2,6 +2,31 @@
 import { create } from 'zustand';
 import { Talent, FitnessTest, Workout, Book, YearSummary, Article, Skill, Hobby, Schedule, ScheduleRecord, HappinessRecord, Happiness, Trait, ReadingSlot, ReadingSlotObject } from './types';
 import { staticData } from './data/staticData';
+import { backupUserData, API_BASE } from './utils/api';
+
+const STORAGE_KEY = 'talent-showcase-local-data';
+
+// 从 localStorage 加载数据
+function loadFromStorage(): any {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('从 localStorage 加载数据失败', e);
+  }
+  return null;
+}
+
+// 保存数据到 localStorage
+function saveToStorage(data: any) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('保存到 localStorage 失败', e);
+  }
+}
 
 // 主人模式检测
 export function isOwnerMode(): boolean {
@@ -83,14 +108,42 @@ interface AppState {
   exportData: () => any;
   importData: (data: any) => { success: boolean; message: string };
   clearAllData: () => void;
+  saveToLocalStorage: () => void;
+  saveToBackend: () => void;
+  loadFromLocalStorage: () => boolean;
+  loadFromBackend: () => Promise<boolean>;
 }
 
 // 创建 store
 export const useStore = create<AppState>()((set, get) => {
-  // 初始化数据 - 使用静态数据
+  // 辅助函数：合并数据，localStorage 数据优先
+  const mergeData = (staticD: any, storedD: any | null) => {
+    if (!storedD || typeof storedD !== 'object') {
+      return staticD;
+    }
+    
+    const result: any = {};
+    const keys = Object.keys(staticD) as Array<keyof typeof staticD>;
+    
+    keys.forEach(key => {
+      if (Array.isArray(staticD[key])) {
+        result[key] = storedD[key] && Array.isArray(storedD[key]) 
+          ? storedD[key] 
+          : staticD[key];
+      } else {
+        result[key] = storedD[key] !== undefined ? storedD[key] : staticD[key];
+      }
+    });
+    
+    return result;
+  };
+  
+  // 初始化数据 - 优先使用 staticData，然后合并 localStorage
+  const storedData = loadFromStorage();
+  const mergedInitialData = mergeData(staticData, storedData);
   const initialState = {
-    ...staticData,
-    books: staticData.books as Book[],
+    ...mergedInitialData,
+    books: mergedInitialData.books as Book[],
     ownerMode: isOwnerMode(),
   };
 
@@ -106,7 +159,12 @@ export const useStore = create<AppState>()((set, get) => {
   const createAction = <T extends (...args: any[]) => any>(ownerAction: T): T => {
     return ((...args: any[]) => {
       if (isOwner()) {
-        return (ownerAction as any)(...args);
+        const result = (ownerAction as any)(...args);
+        // 每次修改后自动保存到 localStorage
+        get().saveToLocalStorage();
+        // 异步保存到后端
+        get().saveToBackend();
+        return result;
       } else {
         noop();
       }
@@ -308,6 +366,10 @@ export const useStore = create<AppState>()((set, get) => {
           readingSlots: data.readingSlots || [],
           brokenSlots: data.brokenSlots || [],
         });
+        // 导入后自动保存到 localStorage
+        get().saveToLocalStorage();
+        // 异步备份到后端
+        get().saveToBackend();
         return { success: true, message: '数据导入成功！' };
       }
       return { success: false, message: '无效的数据格式' };
@@ -328,6 +390,120 @@ export const useStore = create<AppState>()((set, get) => {
         happinessRecords: [],
         traits: [],
       });
-    })
+      // 清空后自动保存到 localStorage
+      get().saveToLocalStorage();
+    }),
+    
+    // 保存到 localStorage
+    saveToLocalStorage: () => {
+      const state = get();
+      saveToStorage({
+        talents: state.talents,
+        fitnessTests: state.fitnessTests,
+        workouts: state.workouts,
+        books: state.books,
+        yearSummaries: state.yearSummaries,
+        articles: state.articles,
+        skills: state.skills,
+        hobbies: state.hobbies,
+        schedules: state.schedules,
+        happiness: state.happiness,
+        scheduleRecords: state.scheduleRecords,
+        happinessRecords: state.happinessRecords,
+        traits: state.traits,
+        readingSlots: state.readingSlots,
+        brokenSlots: state.brokenSlots,
+      });
+    },
+    
+    // 异步保存到后端
+    saveToBackend: () => {
+      const userId = localStorage.getItem('talent-showcase-user-id') || 'default-user';
+      const state = get();
+      const dataToSave = {
+        talents: state.talents,
+        fitnessTests: state.fitnessTests,
+        workouts: state.workouts,
+        books: state.books,
+        yearSummaries: state.yearSummaries,
+        articles: state.articles,
+        skills: state.skills,
+        hobbies: state.hobbies,
+        schedules: state.schedules,
+        happiness: state.happiness,
+        scheduleRecords: state.scheduleRecords,
+        happinessRecords: state.happinessRecords,
+        traits: state.traits,
+        readingSlots: state.readingSlots,
+        brokenSlots: state.brokenSlots,
+      };
+      
+      backupUserData(userId, dataToSave).catch(err => {
+        console.error('保存到后端失败:', err);
+      });
+    },
+    
+    // 从 localStorage 加载
+    loadFromLocalStorage: () => {
+      const storedData = loadFromStorage();
+      if (storedData) {
+        set({
+          talents: storedData.talents || staticData.talents,
+          fitnessTests: storedData.fitnessTests || staticData.fitnessTests,
+          workouts: storedData.workouts || staticData.workouts,
+          books: storedData.books || staticData.books,
+          yearSummaries: storedData.yearSummaries || staticData.yearSummaries,
+          articles: storedData.articles || staticData.articles,
+          skills: storedData.skills || staticData.skills,
+          hobbies: storedData.hobbies || staticData.hobbies,
+          schedules: storedData.schedules || staticData.schedules,
+          happiness: storedData.happiness || staticData.happiness,
+          scheduleRecords: storedData.scheduleRecords || staticData.scheduleRecords,
+          happinessRecords: storedData.happinessRecords || staticData.happinessRecords,
+          traits: storedData.traits || staticData.traits,
+          readingSlots: storedData.readingSlots || staticData.readingSlots,
+          brokenSlots: storedData.brokenSlots || staticData.brokenSlots,
+        });
+        return true;
+      }
+      return false;
+    },
+    
+    // 从后端加载数据
+    loadFromBackend: async () => {
+      const userId = localStorage.getItem('talent-showcase-user-id');
+      if (!userId) return false;
+
+      try {
+        const response = await fetch(`${API_BASE}/backup/${userId}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          console.log('[从后端加载数据成功]');
+          const backendData = result.data;
+          set({
+            talents: backendData.talents || staticData.talents,
+            fitnessTests: backendData.fitnessTests || staticData.fitnessTests,
+            workouts: backendData.workouts || staticData.workouts,
+            books: backendData.books || staticData.books,
+            yearSummaries: backendData.yearSummaries || staticData.yearSummaries,
+            articles: backendData.articles || staticData.articles,
+            skills: backendData.skills || staticData.skills,
+            hobbies: backendData.hobbies || staticData.hobbies,
+            schedules: backendData.schedules || staticData.schedules,
+            happiness: backendData.happiness || staticData.happiness,
+            scheduleRecords: backendData.scheduleRecords || staticData.scheduleRecords,
+            happinessRecords: backendData.happinessRecords || staticData.happinessRecords,
+            traits: backendData.traits || staticData.traits,
+            readingSlots: backendData.readingSlots || staticData.readingSlots,
+            brokenSlots: backendData.brokenSlots || staticData.brokenSlots,
+          });
+          return true;
+        }
+      } catch (e) {
+        console.error('[从后端加载数据失败]', e);
+      }
+      return false;
+    },
   };
 });
