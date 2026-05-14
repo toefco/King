@@ -70,10 +70,6 @@ export default function BookGrid() {
       .sort((a, b) => (b.readDate || '').localeCompare(a.readDate || ''));
   }, [books]);
 
-  const hasThoughtsBooks = useMemo(() => {
-    return completedBooks.filter(b => b.thoughts && b.thoughts.trim().length > 0);
-  }, [completedBooks]);
-
   const monthOptions = useMemo(() => {
     const set = new Set<string>();
     for (const book of completedBooks) {
@@ -236,45 +232,6 @@ export default function BookGrid() {
 
   return (
     <div className="space-y-6">
-      {/* 已记录的认知思考 - 专门展示有思考的书籍 */}
-      {hasThoughtsBooks.length > 0 && (
-        <div className="bg-ink/70 border border-gold/20 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-serif text-gold">📝 已记录的认知</h3>
-            <span className="text-xs text-paper/50">{hasThoughtsBooks.length} 本书有思考记录</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {hasThoughtsBooks.map((book) => (
-              <div key={book.id} className="relative rounded-xl overflow-hidden border border-gold/15 bg-ink/50 p-4">
-                <div className="flex gap-3 items-start">
-                  <div className="w-16 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-white/5">
-                    <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium text-paper/90 truncate">{book.title}</h4>
-                    <p className="text-xs text-gold/70 mt-1 line-clamp-3">{book.thoughts}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
-                  <button
-                    onClick={() => openModal(book, 'cover')}
-                    className="text-xs text-paper/50 hover:text-paper/80 px-2 py-1 rounded hover:bg-white/5"
-                  >
-                    查看图片
-                  </button>
-                  <button
-                    onClick={() => openEditModal(book)}
-                    className="text-xs text-gold/70 hover:text-gold px-2 py-1 rounded hover:bg-gold/5"
-                  >
-                    编辑
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* 阅读汇总栏 - 10格图片上传 */}
       <div className="bg-ink/70 border border-gold/10 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
