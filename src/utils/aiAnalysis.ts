@@ -1,4 +1,4 @@
-import { Workout, FitnessTest, Book, YearSummary, Article, Skill, Hobby, ScheduleRecord, HappinessRecord, Trait } from '../types';
+import { Workout, FitnessTest, Book, YearSummary, Article, Skill, Hobby, ScheduleRecord, HappinessRecord, Trait, ReadingSlotObject } from '../types';
 
 export interface AnalysisBlock {
   label: string;
@@ -1008,7 +1008,7 @@ export function analyzeGlobalPortrait(params: {
       return { image: slot.trim().length > 0 };
     }
     return {
-      image: slot.imageUrl && slot.imageUrl.trim().length > 0,
+      image: !!(slot.imageUrl && slot.imageUrl.trim().length > 0),
       years: slot.totalYears,
       books: slot.totalBooks,
       hours: slot.totalHours,
@@ -1028,10 +1028,8 @@ export function analyzeGlobalPortrait(params: {
   const periodTotalHours = periodSlotData.reduce((sum, s) => sum + (s.hours || 0) + (s.minutes || 0) / 60, 0);
   const allTotalHours = allSlotData.reduce((sum, s) => sum + (s.hours || 0) + (s.minutes || 0) / 60, 0);
   
-  const periodTotalDays = periodSlotData.reduce((sum, s) => sum + (s.days || 0), 0);
   const allTotalDays = allSlotData.reduce((sum, s) => sum + (s.days || 0), 0);
   
-  const periodTotalYears = periodSlotData.reduce((sum, s) => sum + (s.years || 0), 0);
   const allTotalYears = allSlotData.reduce((sum, s) => sum + (s.years || 0), 0);
 
   // ── 板块一：各系统存档数量总览 ────────────────────────────────────────────

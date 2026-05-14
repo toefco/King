@@ -139,7 +139,6 @@ export default function TestList() {
               .sort((a, b) => b.date.localeCompare(a.date))
               .map((test) => {
                 const info = testTypes.find((t) => t.value === test.type);
-                const isBalanceOrFlex = test.type === 'flexibility' || test.type === 'balance';
                 return (
                   <div key={test.id} className="flex items-center justify-between px-3 py-2 rounded-lg text-sm group" style={{
                     background: 'rgba(239,68,68,0.03)', border: '1px solid rgba(239,68,68,0.08)'

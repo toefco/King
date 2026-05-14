@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useStore } from '../store';
+import type { ReadingSlotObject } from '../types';
 import {
   analyzeFitness, analyzeWisdom, analyzeSpirit,
   analyzeSkills, analyzeHobbies, analyzeTime, analyzeGlobalPortrait,
@@ -71,11 +72,13 @@ export function useRealtimeAnalysis(
   const scheduleRecords = useStore(s => s.scheduleRecords);
   const happinessRecords = useStore(s => s.happinessRecords);
   const traits = useStore(s => s.traits);
+  const readingSlots = useStore(s => s.readingSlots);
 
   const periodLabel = buildPeriodLabel(rangeMode, params);
 
   // ── 过滤后的数据（useMemo 避免每次渲染重复过滤）────────────────────────────
   const filtered = useMemo(() => {
+    // readingSlots 没有日期，所以不需要过滤
     return {
       articles: articles.filter(a => filterByDate(a.publishDate, rangeMode, params)),
       skills: rangeMode === 'all' ? skills : skills.filter(s => s.date && filterByDate(s.date, rangeMode, params)),
@@ -114,6 +117,9 @@ export function useRealtimeAnalysis(
             periodSchedule: filtered.scheduleRecords, allSchedule: scheduleRecords,
             periodHappiness: filtered.happinessRecords, allHappiness: happinessRecords,
             periodTraits: filtered.traits, allTraits: traits,
+            // readingSlots 没有日期，所以 periodReadingSlots 和 allReadingSlots 一样
+            periodReadingSlots: readingSlots.filter(s => s !== null) as (ReadingSlotObject | string)[],
+            allReadingSlots: readingSlots.filter(s => s !== null) as (ReadingSlotObject | string)[],
             periodLabel,
           }) };
         default:
@@ -128,7 +134,7 @@ export function useRealtimeAnalysis(
     workouts, fitnessTests,
     books, yearSummaries,
     articles, skills, hobbies,
-    scheduleRecords, happinessRecords, traits,
+    scheduleRecords, happinessRecords, traits, readingSlots,
     filtered.articles, filtered.skills, filtered.hobbies,
     filtered.scheduleRecords, filtered.happinessRecords,
     filtered.books, filtered.workouts, filtered.traits,
