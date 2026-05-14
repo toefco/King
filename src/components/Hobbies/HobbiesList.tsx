@@ -164,19 +164,6 @@ export default function HobbiesList() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-paper/60 mb-2">标题</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full rounded-xl px-4 py-2.5 text-paper focus:outline-none"
-                  style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.2)' }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(236,72,153,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(236,72,153,0.2)')}
-                  required
-                />
-              </div>
-              <div>
                 <label className="block text-sm text-paper/60 mb-2">内容</label>
                 <textarea
                   value={form.content}

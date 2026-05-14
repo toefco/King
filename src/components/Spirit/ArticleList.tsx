@@ -90,16 +90,6 @@ export default function ArticleList() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm text-paper/70 mb-2">标题</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full bg-ink/50 border border-gold/30 rounded-lg px-4 py-2 text-paper focus:outline-none focus:border-gold"
-                  required
-                />
-              </div>
-              <div>
                 <label className="block text-sm text-paper/70 mb-2">时间</label>
                 <input
                   type="date"
