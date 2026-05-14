@@ -13,14 +13,6 @@ const categoryColors: Record<string, string> = {
   '涤心': '#22d3ee', '养魂': '#818cf8', '写字': '#fbbf24',
 };
 
-const categoryDescriptions: Record<string, string> = {
-  '归元': '睡觉', '贪欲': '玩手机', '深蓝加点': '主动学习',
-  '锻体': '主动锻炼肉体', '敛息': '工作摸鱼', '痴妄': '玩电脑',
-  '入魔': '上班实际工作', '打坐': '工作吃饭',
-  '境域探索': '离开出租房3小时以上', '涤心': '喝茶',
-  '养魂': '听音乐', '写字': '写毛笔字',
-};
-
 function formatDuration(minutes: number) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -404,23 +396,7 @@ export default function ScheduleImport() {
         <input ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleFile} />
       </div>
 
-      {/* Category Legend - always visible */}
-      <div className="mb-6">
-        <p className="text-sm text-paper/50 font-serif mb-3">类别说明</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {Object.entries(categoryDescriptions).map(([name, desc]) => (
-            <div key={name} className="flex items-center gap-3 rounded-xl px-4 py-3.5" style={{
-                background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.10)'
-              }}>
-              <span className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ background: categoryColors[name] || '#6b7280' }} />
-              <div className="min-w-0">
-                <div className="text-base text-paper/90 font-medium">{name}</div>
-                <div className="text-sm text-paper/40 mt-0.5 truncate">{desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+
 
       {scheduleRecords.length === 0 ? (
         <div

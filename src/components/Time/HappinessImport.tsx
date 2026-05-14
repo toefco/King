@@ -20,11 +20,96 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 ];
 
 const DIMS = [
-  { key: 'sensory' as const, label: '感官感觉度', color: '#f87171', desc: '身体感官的愉悦程度' },
-  { key: 'memory'  as const, label: '记忆留存度', color: '#60a5fa', desc: '事件在记忆中留存时长' },
-  { key: 'soul'    as const, label: '灵魂触动度', color: '#a78bfa', desc: '内心深层的触动与震撼' },
-  { key: 'growth'  as const, label: '自我成长度', color: '#34d399', desc: '对自身成长的促进程度' },
-  { key: 'social'  as const, label: '人际连接度', color: '#fb923c', desc: '与他人或精神的联接深度' },
+  { 
+    key: 'sensory' as const, 
+    label: '情绪感觉', 
+    color: '#f87171', 
+    desc: '身体感官的愉悦程度',
+    standards: [
+      '1. 表情无变化，内心无感',
+      '2. 呼吸平稳，轻微愉悦',
+      '3. 嘴角微扬，淡淡开心',
+      '4. 稍微波动，想笑',
+      '5. 自然微笑，心情变好',
+      '6. 快乐明显，想分享',
+      '7. 笑出声，情绪释放',
+      '8. 激昂抖动，难以平复',
+      '9. 大笑大叫，情绪爆发',
+      '10. 喜极而泣，极致巅峰'
+    ]
+  },
+  { 
+    key: 'memory' as const, 
+    label: '记忆留存', 
+    color: '#60a5fa', 
+    desc: '事件在记忆中留存时长',
+    standards: [
+      '1. 几分钟转瞬即逝',
+      '2. 半小时，结束即忘',
+      '3. 几小时，当日有效',
+      '4. 一下午，次日淡忘',
+      '5. 一两天，持久回味',
+      '6. 一周内，反复想起',
+      '7. 人生锚点，永久记忆',
+      '8. 年度亮点，持久赋能',
+      '9. 长期影响，改变轨迹',
+      '10. 里程碑，蜕变'
+    ]
+  },
+  { 
+    key: 'soul' as const, 
+    label: '灵魂触动', 
+    color: '#a78bfa', 
+    desc: '内心深层的触动与震撼',
+    standards: [
+      '1. 正常事',
+      '2. 无特别',
+      '3. 认同感，轻微共鸣',
+      '4. 挺不错，有点触动',
+      '5. 真好，被治愈',
+      '6. 善意连接，被理解',
+      '7. 打动触动，内心震撼',
+      '8. 生命意义，通透觉醒',
+      '9. 彻底觉醒，认知重构',
+      '10. 死亡重生'
+    ]
+  },
+  { 
+    key: 'growth' as const, 
+    label: '自我成长', 
+    color: '#34d399', 
+    desc: '对自身成长的促进程度',
+    standards: [
+      '1. 无意义',
+      '2. 重复性',
+      '3. 小知识',
+      '4. 有用技巧',
+      '5. 修正理念',
+      '6. 理解内化',
+      '7. 能力上升',
+      '8. 改变习惯',
+      '9. 新价值观',
+      '10. 我是谁'
+    ]
+  },
+  { 
+    key: 'social' as const, 
+    label: '人际连接', 
+    color: '#fb923c', 
+    desc: '与他人或精神的联接深度',
+    standards: [
+      '1. 个人',
+      '2. 独处',
+      '3. 事物交接',
+      '4. 平等对话',
+      '5. 陪伴在一起',
+      '6. 阅读精神联接',
+      '7. 团队协作',
+      '8. 集体认同',
+      '9. 理念同频',
+      '10. 爱'
+    ]
+  },
 ];
 
 const VIEW_LABELS: Record<ViewMode, string> = { day: '日', week: '周', month: '月', year: '年' };
@@ -64,6 +149,7 @@ export default function HappinessImport() {
   const setHappinessRecords = useStore((s) => s.setHappinessRecords);
   const fileRef = useRef<HTMLInputElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const [hoveredDim, setHoveredDim] = useState<string | null>(null);
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -393,11 +479,18 @@ export default function HappinessImport() {
               <span className="text-xs text-paper/30">/ 10</span>
             </div>
           </div>
-          <div className="grid grid-cols-5 gap-2">
-            {DIMS.map(({ key, label, color, desc }) => (
-              <div key={key} className="flex flex-col items-center gap-1.5 rounded-xl py-3 px-2" style={{
-                background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.10)'
-              }}>
+          <div className="grid grid-cols-5 gap-2 relative">
+            {DIMS.map(({ key, label, color, desc, standards }) => (
+              <div 
+                key={key} 
+                className="flex flex-col items-center gap-1.5 rounded-xl py-3 px-2 relative cursor-pointer transition-all"
+                style={{
+                  background: 'rgba(16,185,129,0.04)', 
+                  border: hoveredDim === key ? `1px solid ${color}` : '1px solid rgba(16,185,129,0.10)'
+                }}
+                onMouseEnter={() => setHoveredDim(key)}
+                onMouseLeave={() => setHoveredDim(null)}
+              >
                 <span className="text-xs text-paper/35 text-center leading-tight">{label}</span>
                 <span className="text-base font-medium" style={{ color }}>{allDimAvgs[key]}</span>
                 <div className="relative w-1.5 h-10 bg-ink/80 rounded-full overflow-hidden">
@@ -405,6 +498,36 @@ export default function HappinessImport() {
                     style={{ height: `${(allDimAvgs[key] / 10) * 100}%`, background: color }} />
                 </div>
                 <span className="text-xs text-paper/25 text-center leading-snug mt-0.5">{desc}</span>
+                
+                {/* 评分标准提示框 */}
+                {hoveredDim === key && (
+                  <div 
+                    className="absolute z-50 top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-3 rounded-xl shadow-2xl"
+                    style={{
+                      background: 'rgba(5,20,15,0.98)',
+                      border: `1px solid ${color}40`,
+                      backdropFilter: 'blur(24px)',
+                    }}
+                  >
+                    <div className="text-xs font-medium mb-2" style={{ color }}>{label} - 评分标准</div>
+                    <div className="space-y-1">
+                      {standards.map((std, idx) => (
+                        <div 
+                          key={idx} 
+                          className="text-xs text-paper/70 flex items-start gap-2"
+                        >
+                          <span 
+                            className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-1.5"
+                            style={{ 
+                              background: (idx + 1) <= Math.round(allDimAvgs[key]) ? color : color + '30' 
+                            }}
+                          />
+                          <span>{std}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

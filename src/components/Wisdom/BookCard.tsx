@@ -130,8 +130,8 @@ export default function BookCard({ book, onImageClick, onEdit }: Props) {
             alt=""
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover object-top"
-            style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.06)' : 'scale(1)' }}
+            className="w-full h-full object-cover"
+            style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.06)' : 'scale(1)', objectPosition: 'top center' }}
           />
           {/* Bottom shadow overlay */}
           <div className="absolute bottom-0 left-0 right-0 h-1/5 z-10 pointer-events-none"
@@ -158,7 +158,7 @@ export default function BookCard({ book, onImageClick, onEdit }: Props) {
               loading="lazy"
               decoding="async"
               className="w-full h-full object-cover"
-              style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.04)' : 'scale(1)' }}
+              style={{ transition: 'transform 0.5s ease', transform: isHovered ? 'scale(1.04)' : 'scale(1)', objectPosition: 'top center' }}
             />
           ) : (
             <div
