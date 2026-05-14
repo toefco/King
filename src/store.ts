@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import { Talent, FitnessTest, Workout, Book, YearSummary, Article, Skill, Hobby, Schedule, ScheduleRecord, HappinessRecord, Happiness, Trait, ReadingSlot, ReadingSlotObject } from './types';
 import { staticData } from './data/staticData';
-import { backupUserData, API_BASE } from './utils/api';
 
 const STORAGE_KEY = 'talent-showcase-local-data';
 
@@ -106,12 +105,11 @@ interface AppState {
   
   // 数据管理
   exportData: () => any;
+  downloadData: () => void;
   importData: (data: any) => { success: boolean; message: string };
   clearAllData: () => void;
   saveToLocalStorage: () => void;
-  saveToBackend: () => void;
   loadFromLocalStorage: () => boolean;
-  loadFromBackend: () => Promise<boolean>;
 }
 
 // 创建 store
@@ -162,8 +160,6 @@ export const useStore = create<AppState>()((set, get) => {
         const result = (ownerAction as any)(...args);
         // 每次修改后自动保存到 localStorage
         get().saveToLocalStorage();
-        // 异步保存到后端
-        get().saveToBackend();
         return result;
       } else {
         noop();
@@ -347,6 +343,21 @@ export const useStore = create<AppState>()((set, get) => {
       };
     },
 
+    // 下载数据为JSON文件
+    downloadData: () => {
+      const data = get().exportData();
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `talent-showcase-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+
     importData: createAction((data: any) => {
       if (data.version && data.books) {
         set({
@@ -368,8 +379,6 @@ export const useStore = create<AppState>()((set, get) => {
         });
         // 导入后自动保存到 localStorage
         get().saveToLocalStorage();
-        // 异步备份到后端
-        get().saveToBackend();
         return { success: true, message: '数据导入成功！' };
       }
       return { success: false, message: '无效的数据格式' };
@@ -416,33 +425,6 @@ export const useStore = create<AppState>()((set, get) => {
       });
     },
     
-    // 异步保存到后端
-    saveToBackend: () => {
-      const userId = localStorage.getItem('talent-showcase-user-id') || 'default-user';
-      const state = get();
-      const dataToSave = {
-        talents: state.talents,
-        fitnessTests: state.fitnessTests,
-        workouts: state.workouts,
-        books: state.books,
-        yearSummaries: state.yearSummaries,
-        articles: state.articles,
-        skills: state.skills,
-        hobbies: state.hobbies,
-        schedules: state.schedules,
-        happiness: state.happiness,
-        scheduleRecords: state.scheduleRecords,
-        happinessRecords: state.happinessRecords,
-        traits: state.traits,
-        readingSlots: state.readingSlots,
-        brokenSlots: state.brokenSlots,
-      };
-      
-      backupUserData(userId, dataToSave).catch(err => {
-        console.error('保存到后端失败:', err);
-      });
-    },
-    
     // 从 localStorage 加载
     loadFromLocalStorage: () => {
       const storedData = loadFromStorage();
@@ -465,43 +447,6 @@ export const useStore = create<AppState>()((set, get) => {
           brokenSlots: storedData.brokenSlots || staticData.brokenSlots,
         });
         return true;
-      }
-      return false;
-    },
-    
-    // 从后端加载数据
-    loadFromBackend: async () => {
-      const userId = localStorage.getItem('talent-showcase-user-id');
-      if (!userId) return false;
-
-      try {
-        const response = await fetch(`${API_BASE}/backup/${userId}`);
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-          console.log('[从后端加载数据成功]');
-          const backendData = result.data;
-          set({
-            talents: backendData.talents || staticData.talents,
-            fitnessTests: backendData.fitnessTests || staticData.fitnessTests,
-            workouts: backendData.workouts || staticData.workouts,
-            books: backendData.books || staticData.books,
-            yearSummaries: backendData.yearSummaries || staticData.yearSummaries,
-            articles: backendData.articles || staticData.articles,
-            skills: backendData.skills || staticData.skills,
-            hobbies: backendData.hobbies || staticData.hobbies,
-            schedules: backendData.schedules || staticData.schedules,
-            happiness: backendData.happiness || staticData.happiness,
-            scheduleRecords: backendData.scheduleRecords || staticData.scheduleRecords,
-            happinessRecords: backendData.happinessRecords || staticData.happinessRecords,
-            traits: backendData.traits || staticData.traits,
-            readingSlots: backendData.readingSlots || staticData.readingSlots,
-            brokenSlots: backendData.brokenSlots || staticData.brokenSlots,
-          });
-          return true;
-        }
-      } catch (e) {
-        console.error('[从后端加载数据失败]', e);
       }
       return false;
     },
