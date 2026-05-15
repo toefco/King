@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导出数据</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #0a0a14;
+            color: #e0e0e0;
+        }
+        h1 { color: #8b90b8; }
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e0e0e0;
+            padding: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        button {
+            background: linear-gradient(135deg, #8b90b8, #6eb5c9);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { opacity: 0.9; }
+        .success { color: #6eb5c9; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>📤 数据导出工具</h1>
+    
+    <p>点击下方按钮，从浏览器导出所有数据：</p>
+    
+    <button onclick="exportData()">1️⃣ 导出数据</button>
+    <button onclick="copyToClipboard()">2️⃣ 复制到剪贴板</button>
+    <button onclick="checkLocalStorage()">🔍 检查数据</button>
+    
+    <div id="status" class="success"></div>
+    
+    <h3>JSON 数据：</h3>
+    <textarea id="dataOutput" readonly></textarea>
+    
+    <p style="margin-top: 20px; color: #8b90b
